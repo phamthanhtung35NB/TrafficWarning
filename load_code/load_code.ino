@@ -7,8 +7,9 @@ HardwareSerial SerialPort(1);  // UART1 cho truyền nhận dữ liệu
 // Định nghĩa chân
 #define rxPin 16  // Rx của UART
 #define txPin 17  // Tx của UART
-#define controlPin 25  // Chân để điều khiển chế độ nhận/gửi
-#define buzzerPin 26  // Chân còi
+#define controlPin 2  // Chân để điều khiển chế độ nhận/gửi
+#define buzzerPin 4   // Chân còi
+
 
 // Biến lưu chuỗi nhận và dữ liệu đã xử lý
 String receivedData = "";
