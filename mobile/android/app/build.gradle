@@ -2,6 +2,7 @@ plugins {
     id "com.android.application"
     id "dev.flutter.flutter-gradle-plugin" // Flutter plugin
     id 'com.google.gms.google-services' // Firebase plugin
+
 }
 
 def localProperties = new Properties()
@@ -27,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.mobile"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -61,3 +62,4 @@ dependencies {
     implementation 'androidx.appcompat:appcompat-resources:1.6.1'
 }
 
+apply plugin: 'com.google.gms.google-services'
