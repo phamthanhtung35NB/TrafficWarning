@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'config.dart'; // Nhập file cấu hình
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: Config.apiKey,
+        authDomain: Config.authDomain,
+        databaseURL: Config.databaseURL,
+        projectId: Config.projectId,
+        storageBucket: Config.storageBucket,
+        messagingSenderId: Config.messagingSenderId,
+        appId: Config.appId,
+      ),
+    );
+  } else {
+    await Firebase.initializeApp();
+  }
+
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
