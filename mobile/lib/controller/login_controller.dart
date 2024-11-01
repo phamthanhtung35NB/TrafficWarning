@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginController {
@@ -8,6 +9,7 @@ class LoginController {
           email: email,
           password: password,
         );
+        //in uid ra log
         return userCredential.user?.uid;
         //không đăng nhập được
       } on FirebaseAuthException catch (e) {

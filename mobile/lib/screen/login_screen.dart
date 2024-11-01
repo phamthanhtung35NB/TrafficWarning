@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (result != null) {
+      print("UID: $result");
       if (result.length == 28) { // Assuming UID is 28 characters long
         Navigator.pushNamed(context, '/home_screen', arguments: result);
 

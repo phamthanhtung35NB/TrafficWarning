@@ -1,30 +1,28 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
-import 'package:mobile/screen/login_screen.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ULISync',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => LoginScreen(),
-        // '/home_screen': (context) => HomeScreen(),
-        '/login_screen': (context) => LoginScreen(),
-      },
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home Screen'),
       ),
-
-      // home:  LoginScreen(),
+      body: FlutterMap(
+        options: MapOptions(
+          center: LatLng(51.5, -0.09),
+          zoom: 13.0,
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            subdomains: const ['a', 'b', 'c'],
+          ),
+        ],
+      ),
     );
   }
 }
