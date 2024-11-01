@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ULISync'),
+        title: const Text('Đăng nhập'),
       ),
       body: Center(
         child: Padding(
@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 400.0,
                 child: Image(
-                  image: AssetImage('assets/logo.jpg'),
+                  image: AssetImage('assets/image/logo.jpg'),
                 ),
               ),
               const SizedBox(height: 50.0),

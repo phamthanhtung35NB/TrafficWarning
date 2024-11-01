@@ -3,28 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 class LoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   Future<String?> login(String email, String password) async {
-    String username = email.split('@')[0];
-    // return 'username: $useacrname password: $password';
-    if (password==username) {
-      try {
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-        return userCredential.user?.uid;
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'email-already-in-use') {
-          return 'Thông tin tài khoản hoặc mật khẩu không chính xác.';
-        } else if (e.code == 'weak-password') {
-          return 'Mật khẩu cung cấp quá yếu.';
-        } else {
-          return 'Đã xảy ra lỗi: ${e.message}';
-        }
-      } catch (e) {
-        return 'Đã xảy ra lỗi. Vui lòng thử lại: ${e.toString()}';
-      }
-    }
-    else {
       try {
         UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: email,
@@ -43,7 +21,7 @@ class LoginController {
       } catch (e) {
         return 'Đã xảy ra lỗi. Vui lòng thử lại: ${e.toString()}';
       }
-    }
+
 
   }
 
