@@ -3,14 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobile/screen/login_screen.dart';
 import 'package:mobile/screen/home_screen.dart';
-
-import 'config.dart'; // Nhập file cấu hình
+import 'config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (kIsWeb) {
     await Firebase.initializeApp(
-      options: FirebaseOptions(
+      options: const FirebaseOptions(
         apiKey: Config.apiKey,
         authDomain: Config.authDomain,
         databaseURL: Config.databaseURL,
