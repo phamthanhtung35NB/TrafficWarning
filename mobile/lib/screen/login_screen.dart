@@ -81,15 +81,16 @@ class _LoginScreenState extends State<LoginScreen> {
         title: const Text('Đăng nhập'),
       ),
       body: Center(
+        //paddiing top 100
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(top: 0.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const SizedBox(
-                height: 400.0,
+                height: 200.0,
                 child: Image(
-                  image: AssetImage('assets/image/logo.jpg'),
+                  image: AssetImage('assets/images/logo.jpg'),
                 ),
               ),
               const SizedBox(height: 50.0),

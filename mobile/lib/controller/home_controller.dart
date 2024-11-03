@@ -1,5 +1,5 @@
+// File: lib/controller/home_controller.dart
 import 'package:firebase_database/firebase_database.dart';
-import 'package:mobile/config.dart';
 
 class HomeController {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
