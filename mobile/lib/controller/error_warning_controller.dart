@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:mobile/controller/error_warning_controller.dart';
 
 class ErrorWarningController {
   void showError(BuildContext context, String message) {
