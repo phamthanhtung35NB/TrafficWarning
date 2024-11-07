@@ -50,6 +50,10 @@ const int RAIN_SENSOR_PIN_3 = 34;     // Top sensor      D34
 const int RAIN_SENSOR_PIN_NGAP = 39;  // ngập   VN
 const int RAIN_SENSOR_PIN_MUA = 36;   // mưa   VP
 
+const int COI = 15;
+
+const int C1 = 19;
+const int C2 = 23;
 bool getRain() {
   // Read analog values from each sensor
   int Value = analogRead(RAIN_SENSOR_PIN_MUA);
@@ -116,8 +120,24 @@ bool initWifi() {
   WiFi.begin(ssid, password);
 
   unsigned long wifiTimeout = millis() + 10000;  // Giới hạn thời gian 10 giây
-  while (WiFi.status() != WL_CONNECTED && millis() < wifiTimeout) {
-    delay(1000);
+  // while (WiFi.status() != WL_CONNECTED && millis() < wifiTimeout) {
+  while (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(COI, 0);
+    delay(200);
+    digitalWrite(COI, 1);
+    delay(500);
+    digitalWrite(COI, 0);
+    delay(200);
+    digitalWrite(COI, 1);
+    delay(500);
+    digitalWrite(COI, 0);
+    delay(200);
+    digitalWrite(COI, 1);
+    delay(500);
+    digitalWrite(COI, 0);
+    delay(200);
+    digitalWrite(COI, 1);
+    delay(2000);
     Serial.println("Connecting to WiFi...");
   }
   if (WiFi.status() == WL_CONNECTED) {
@@ -125,19 +145,31 @@ bool initWifi() {
     return true;
   } else {
     Serial.println("Failed to connect to WiFi");
+    digitalWrite(COI, 0);
     return false;
   }
 }
 void initBmp() {
   // Khởi tạo I2C (nếu cần thiết) với ESP32
-  Wire.begin(21, 22); // SDA = 21, SCL = 22 (đây là mặc định, có thể không cần)
+  Wire.begin(21, 22);  // SDA = 21, SCL = 22 (đây là mặc định, có thể không cần)
 
   // Kiểm tra kết nối cảm biến BMP180
   if (!bmp.begin()) {
     Serial.println("Không tìm thấy cảm biến BMP180!");
     while (1) {
       Serial.println("Không tìm thấy cảm biến BMP180!");  // In thông báo lỗi liên tục
-      delay(1000);                                        // Đợi 1 giây trước khi in lại
+      digitalWrite(COI, 0);
+      delay(200);
+      digitalWrite(COI, 1);
+      delay(500);
+      digitalWrite(COI, 0);
+      delay(200);
+      digitalWrite(COI, 1);
+      delay(500);
+      digitalWrite(COI, 0);
+      delay(200);
+      digitalWrite(COI, 1);
+      delay(2000);  // Đợi 1 giây trước khi in lại
     }
   }
 
@@ -174,13 +206,38 @@ void setup() {
   mySerial.begin(115200, SERIAL_8N1, rxPin, txPin);
 
   pinMode(NAP_PIN, INPUT);
+  pinMode(COI, OUTPUT);
+  pinMode(C1, OUTPUT);
+  pinMode(C2, OUTPUT);
+  digitalWrite(C1, 1);
+  digitalWrite(C2, 1);
   // Khởi động kết nối wifi
   if (initWifi()) {
+    Serial.println("1");
     //khởi động firebase
-    initFirebase();
+    // initFirebase();
+    configF.api_key = API_KEY;
+    auth.user.email = USER_EMAIL;
+    auth.user.password = USER_PASSWORD;
+    configF.database_url = DATABASE_URL;
+    configF.token_status_callback = tokenStatusCallback;  // Assign the callback function
+
+    // Initialize Firebase
+    Firebase.begin(&configF, &auth);
+    Firebase.reconnectWiFi(true);
+
+    // Get the MAC address of ESP32
+    macAddress = WiFi.macAddress();
+    Serial.println("MAC Address: " + macAddress);
+
+    json.set("latitudeLongitude", latitudeLongitude);
+    Serial.println("2");
     // Khởi động cảm biến áp suất
     initBmp();
+    Serial.println("3");
   }
+  digitalWrite(C1, 0);
+  digitalWrite(C2, 0);
 }
 //mưa, ngập, mức độ cảnh báo, độ cao của nước
 void pushData(bool mua, bool ngap, int waterLevel, int Cm) {
