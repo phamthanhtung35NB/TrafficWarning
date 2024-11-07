@@ -1,15 +1,20 @@
-// File: lib/controller/map_controller.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mobile/controller/home_controller.dart';
+import 'package:mobile/services/firebasedb.dart';
+import 'package:mobile/model/markerss.dart';
 
 class CustomMapController {
   List<Marker> markers = [];
+  Marker? userLocationMarker;
   LatLng currentPosition = LatLng(21.038859, 105.785613);
-  final HomeController homeController = HomeController();
 
+  final Firebasedb firebasedb = Firebasedb();
+  final MapController mapController = MapController();
+
+  // Get current location
   Future<void> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -33,51 +38,97 @@ class CustomMapController {
 
     Position position = await Geolocator.getCurrentPosition();
     currentPosition = LatLng(position.latitude, position.longitude);
-    markers.add(
-      Marker(
-        width: 80.0,
-        height: 80.0,
-        point: currentPosition,
-        builder: (ctx) => const Icon(Icons.my_location, color: Colors.blue, size: 40.0),
-      ),
+    userLocationMarker = Marker(
+      width: 30.0,
+      height: 30.0,
+      point: currentPosition,
+      builder: (ctx) => const Icon(Icons.my_location, color: Colors.blue, size: 40.0),
     );
   }
 
-  Future<void> fetchMarkers() async {
-    Map<String, dynamic> devices = await homeController.fetchDevices();
-    List<Marker> newMarkers = [];
-    devices.forEach((key, value) {
-      if (key != 'sumDevices') {
-        List<String> latLng = (value['latitudeLongitude'] as String).split(', ');
-        newMarkers.add(
-          Marker(
-            width: 50.0,
-            height: 50.0,
-            point: LatLng(double.parse(latLng[0]), double.parse(latLng[1])),
-            builder: (ctx) => GestureDetector(
-              onTap: () => _showDeviceInfo(ctx, value['level'], value['other']),
-              child: const Icon(Icons.location_on, color: Colors.red, size: 40.0),
-            ),
-          ),
-        );
+  // Listen to device changes
+  void listenToDeviceChanges() {
+    firebasedb.listenToDeviceChanges((devices) {
+      List<Marker> newMarkers = [];
+      if (kDebugMode) {
+        print("load data");
       }
+      devices.forEach((key, value) {
+        if (key != 'sumDevices') {
+          Markerss marker = Markerss.fromJson(Map<String, dynamic>.from(value));
+          List<String> latLng = marker.latitudeLongitude.split(', ');
+          // print ra các thông tin của thiết bị
+          if (kDebugMode) {
+            print('Level: ${marker.level}');
+          }
+          if (kDebugMode) {
+            print('Other: ${marker.other}');
+          }
+          // tạo marker cho các thiết bị
+          newMarkers.add(
+            Marker(
+              width: 50.0,
+              height: 50.0,
+              point: LatLng(double.parse(latLng[0]), double.parse(latLng[1])),
+              builder: (ctx) => GestureDetector(
+                onTap: () => _showDeviceInfo(ctx, marker.level, marker.other, marker.mua, marker.ngap, marker.waterDepth, marker.uv),
+                child: const Icon(Icons.location_on, color: Colors.red, size: 40.0),
+              ),
+            ),
+          );
+        }
+      });
+      markers = newMarkers;
     });
-    markers.addAll(newMarkers);
   }
 
-  void _showDeviceInfo(BuildContext context, int level, String other) {
+  // hiển thị thông tin thiết bị
+  void _showDeviceInfo(BuildContext context, int level, String other, bool mua, bool ngap, int waterDepth, double uv) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Device Info'),
-          content: Text('Level: $level\nOther: $other'),
-          actions: <Widget>[
+          title: const Text('Thông tin thiết bị'),
+          // nền xám
+          backgroundColor: Colors.grey[500],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (level == 1)
+                Text ('Cảnh báo mực nước cấp: $level' , style: const TextStyle(color: Colors.yellow))
+              else if (level == 2)
+                Text('Cảnh báo mục nước cấp: $level', style: const TextStyle(color: Colors.orange))
+              else if (level == 3)
+                  Text('Cảnh báo mục nước cấp: $level', style: const TextStyle(color: Colors.red)),
+
+              if (mua==true)
+                const Text('Có mưa')
+              else
+                const Text('Không mưa'),
+              if (ngap==true)
+                const Text('Có ngập')
+              else
+                const Text('Không ngập'),
+              if (waterDepth > 0)
+                Text('Độ sâu nước: $waterDepth cm')
+              else if (waterDepth>10)
+                Text('Độ sâu nước: $waterDepth cm', style: const TextStyle(color: Colors.red))
+              else
+                const Text('Độ sâu nước: Không xác định'),
+              if (uv > 0)
+                Text('Tia cực tím: $uv')
+              else if (uv>10)
+                Text('Tia cực tím: $uv', style: const TextStyle(color: Colors.red))
+              else
+                const Text('Tia cực tím: Không xác định'),
+              Text('Khác: $other'),
+            ],
+          ),
+          actions: [
             TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Đóng'),
             ),
           ],
         );
