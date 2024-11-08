@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobile/services/firebasedb.dart';
 import 'package:mobile/model/markerss.dart';
+import 'package:mobile/widgets/icon_markers.dart';
 
 class CustomMapController {
   List<Marker> markers = [];
@@ -72,7 +73,7 @@ class CustomMapController {
               point: LatLng(double.parse(latLng[0]), double.parse(latLng[1])),
               builder: (ctx) => GestureDetector(
                 onTap: () => _showDeviceInfo(ctx, marker.level, marker.other, marker.mua, marker.ngap, marker.waterDepth, marker.uv),
-                child: const Icon(Icons.location_on, color: Colors.red, size: 40.0),
+                child: IconMarkersCustomDrawer(currentPosition: currentPosition).getIcon(marker),
               ),
             ),
           );

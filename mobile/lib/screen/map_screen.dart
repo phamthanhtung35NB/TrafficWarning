@@ -27,7 +27,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _startUpdatingLocation() {
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) async {
       await _mapController.getCurrentLocation();
       setState(() {});
     });
@@ -64,6 +64,17 @@ class _MapScreenState extends State<MapScreen> {
                   _mapController.userLocationMarker!,
                 ..._mapController.markers,
               ],
+            ),
+            CircleLayer(
+              circles: _mapController.markers.map((marker) {
+                return CircleMarker(
+                  point: marker.point,
+                  color: Colors.blue.withOpacity(0.3),
+                  borderStrokeWidth: 2,
+                  borderColor: Colors.blue,
+                  radius: 1000, // 1km radius
+                );
+              }).toList(),
             ),
           ],
         ),
