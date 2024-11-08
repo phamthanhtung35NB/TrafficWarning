@@ -65,7 +65,17 @@ class _MapScreenState extends State<MapScreen> {
                 ..._mapController.markers,
               ],
             ),
-
+            CircleLayer(
+              circles: _mapController.markers.map((marker) {
+                return CircleMarker(
+                  point: marker.point,
+                  color: Colors.blue.withOpacity(0.0),
+                  borderStrokeWidth: 2,
+                  borderColor: Colors.blue,
+                  radius: 100, // 1km radius
+                );
+              }).toList(),
+            ),
           ],
         ),
         Positioned(
