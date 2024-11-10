@@ -68,7 +68,7 @@ class CustomMapController {
     });
   }
 
-  // Listen to device changes
+  // hàm lắng nghe sự thay đổi của thiết bị trên firebase và cập nhật marker
   void listenToDeviceChanges() {
     firebasedb.listenToDeviceChanges((devices) {
       List<Marker> newMarkers = [];

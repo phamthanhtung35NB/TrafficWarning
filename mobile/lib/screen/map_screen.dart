@@ -66,13 +66,6 @@ class _MapScreenState extends State<MapScreen> {
               urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
               subdomains: const ['a', 'b', 'c'],
             ),
-            MarkerLayer(
-              markers: [
-                if (_mapController.userLocationMarker != null)
-                  _mapController.userLocationMarker!,
-                ..._mapController.markers,
-              ],
-            ),
             CircleLayer(
               circles: _mapController.markers.map((marker) {
                 // Lấy zoom level hiện tại
@@ -94,8 +87,16 @@ class _MapScreenState extends State<MapScreen> {
                 );
               }).toList(),
             ),
+            MarkerLayer(
+              markers: [
+                if (_mapController.userLocationMarker != null)
+                  _mapController.userLocationMarker!,
+                ..._mapController.markers,
+              ],
+            ),
           ],
         ),
+        // Nút để di chuyển đến vị trí hiện tại
         Positioned(
           bottom: 20,
           right: 20,
