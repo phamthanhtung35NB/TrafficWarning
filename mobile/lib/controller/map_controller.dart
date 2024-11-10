@@ -88,15 +88,15 @@ class CustomMapController {
           }
           // tạo marker cho các thiết bị
           newMarkers.add(
-            Marker(
-              width: 50.0,
-              height: 50.0,
-              point: LatLng(double.parse(latLng[0]), double.parse(latLng[1])),
-              builder: (ctx) => GestureDetector(
-                onTap: () => _showDeviceInfo(ctx, marker.level, marker.other, marker.mua, marker.ngap, marker.waterDepth, marker.uv),
-                child: IconMarkersCustomDrawer(currentPosition: currentPosition).getIcon(marker),
-              ),
-            ),
+              Marker(
+                width: 50.0,
+                height: 50.0,
+                point: LatLng(double.parse(latLng[0]), double.parse(latLng[1])),
+                builder: (ctx) => IconMarkersCustomDrawer(
+                  currentPosition: currentPosition,
+                  marker: marker,
+                ),
+              )
           );
         }
       });

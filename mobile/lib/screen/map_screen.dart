@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:math';
 import 'package:mobile/controller/map_controller.dart';
+import 'package:mobile/widgets/circle_layer.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -53,6 +54,10 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final circleLayerBuilder = CircleLayerBuilder(
+      markers: _mapController.markers,
+      mapController: _mapController,
+    );
     return Stack(
       children: [
         FlutterMap(
@@ -67,33 +72,42 @@ class _MapScreenState extends State<MapScreen> {
               subdomains: const ['a', 'b', 'c'],
             ),
             CircleLayer(
-              circles: _mapController.markers.map((marker) {
-                // Lấy zoom level hiện tại
-                final currentZoom = _mapController.mapController.zoom;
-
-                // Tính toán radius dựa trên zoom level
-                // 1000 meters = 1km là bán kính thực tế mong muốn
-                final metersPerPixel = 156543.03392 *
-                    cos(marker.point.latitude * pi / 180) /
-                    pow(2, currentZoom);
-                final radiusInPixels = 1000 / metersPerPixel;
-
-                return CircleMarker(
-                  point: marker.point,
-                  color: Colors.blue.withOpacity(0.0),
-                  borderStrokeWidth: 2,
-                  borderColor: Colors.blue,
-                  radius: radiusInPixels, // Sử dụng bán kính đã được tính toán
-                );
-              }).toList(),
+              circles: circleLayerBuilder.buildCircles(),
             ),
+            // CircleLayer(
+            //   circles: _mapController.markers.map((marker) {
+            //     // Lấy zoom level hiện tại
+            //     final currentZoom = _mapController.mapController.zoom;
+            //
+            //     // Tính toán radius dựa trên zoom level
+            //     // 1000 meters = 1km là bán kính thực tế mong muốn
+            //     final metersPerPixel = 156543.03392 *
+            //         cos(marker.point.latitude * pi / 180) /
+            //         pow(2, currentZoom);
+            //     final radiusInPixels = 1000 / metersPerPixel;
+            //
+            //     return CircleMarker(
+            //       point: marker.point,
+            //       color: Colors.blue.withOpacity(0.0),
+            //       borderStrokeWidth: 2,
+            //       borderColor: Colors.blue,
+            //       radius: radiusInPixels, // Sử dụng bán kính đã được tính toán
+            //     );
+            //   }).toList(),
+            // ),
             MarkerLayer(
               markers: [
                 if (_mapController.userLocationMarker != null)
-                  _mapController.userLocationMarker!,
+                  _mapController.userLocationMarker!
+
+              ],
+            ),
+            MarkerLayer(
+              markers: [
                 ..._mapController.markers,
               ],
             ),
+
           ],
         ),
         // Nút để di chuyển đến vị trí hiện tại
