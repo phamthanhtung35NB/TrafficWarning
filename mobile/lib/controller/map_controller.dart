@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:mobile/services/firebasedb.dart';
 import 'package:mobile/model/markerss.dart';
 import 'package:mobile/widgets/icon_markers.dart';
+import 'package:mobile/widgets/pulsing_marker.dart';
 
 class CustomMapController {
   List<Marker> markers = [];
@@ -34,17 +35,37 @@ class CustomMapController {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error('Quyền truy cập vị trí bị từ chối vĩnh viễn, chúng tôi không thể yêu cầu cấp quyền.');
+      return Future.error(
+          'Quyền truy cập vị trí bị từ chối vĩnh viễn, chúng tôi không thể yêu cầu cấp quyền.');
     }
 
     Position position = await Geolocator.getCurrentPosition();
     currentPosition = LatLng(position.latitude, position.longitude);
+
+    // Cập nhật marker với PulsingMarker
     userLocationMarker = Marker(
-      width: 30.0,
-      height: 30.0,
+      width: 60.0, // Tăng kích thước để chứa animation
+      height: 60.0,
       point: currentPosition,
-      builder: (ctx) => const Icon(Icons.my_location, color: Colors.blue, size: 40.0),
+      builder: (ctx) => PulsingMarker(),
     );
+
+    // Nếu bạn muốn theo dõi heading (hướng di chuyển)
+    LocationSettings locationSettings = const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+    );
+
+    Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen((Position position) {
+      currentPosition = LatLng(position.latitude, position.longitude);
+      userLocationMarker = Marker(
+        width: 60.0,
+        height: 60.0,
+        point: currentPosition,
+        builder: (ctx) => PulsingMarker(),
+      );
+    });
   }
 
   // Listen to device changes
