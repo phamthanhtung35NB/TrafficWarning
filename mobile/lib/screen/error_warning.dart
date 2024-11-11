@@ -6,35 +6,25 @@ class ErrorWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1 edit text
+    // 2 button
+
+    print('ErrorWarning build');
     return Scaffold(
-      appBar: AppBar(title: const Text('Báo cáo sự cố')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            //button lấy vị trí tạo ộ hiện tại
-            ElevatedButton(
-              onPressed: () {
-                ErrorWarningController().showError(context, 'Đã xảy ra lỗi');
-              },
-              child: const Text('Hiển thị lỗi'),
-            ),
-            //
-            ElevatedButton(
-              onPressed: () {
-                ErrorWarningController().showError(context, 'An error occurred');
-              },
-              child: const Text('Show Error'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                ErrorWarningController().showWarning(context, 'Warning: This is a warning message');
-              },
-              child: const Text('Show Warning'),
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        title: const Text('Error Warning'),
+      ),
+      body: ListView(
+        children: <Widget>[
+          const Text('Error Warning'),
+          ElevatedButton(
+            onPressed: () {
+            },
+            child: const Text('Show Error Warning'),
+          ),
+        ],
       ),
     );
+
   }
 }

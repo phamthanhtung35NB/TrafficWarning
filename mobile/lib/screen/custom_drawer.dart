@@ -17,8 +17,8 @@ class CustomDrawer extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.blue,
                 image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: AssetImage('assets/images/logo.jpg'),
+                  fit: BoxFit.contain,
+                  image: AssetImage('assets/images/logo.png'),
                 ),
               ),
               child: null,

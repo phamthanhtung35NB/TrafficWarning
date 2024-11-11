@@ -80,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text('Đăng nhập'),
       ),
+      // set từ trên xuống
       body: Center(
         //paddiing top 100
         child: Padding(
@@ -88,14 +89,16 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const SizedBox(
-                height: 200.0,
+                width: 150.0,
+                height: 150.0,
                 child: Image(
-                  image: AssetImage('assets/images/logo.jpg'),
+                  image: AssetImage('assets/images/logo.png'),
                 ),
               ),
               const SizedBox(height: 50.0),
               Container(
                 width: 300.0, // Set the desired width
+                height: 50.0,
                 child: TextField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
@@ -107,6 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16.0),
               Container(
                 width: 300.0, // Set the desired width
+                height: 50.0,
                 child: TextField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
@@ -125,6 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _resetPassword,
                 child: const Text('Bạn quên mật khẩu?'),
               ),
+              const SizedBox(height: 10.0),
+
             ],
           ),
         ),
