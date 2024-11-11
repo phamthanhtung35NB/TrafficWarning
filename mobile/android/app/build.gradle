@@ -18,8 +18,8 @@ def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.0
 
 android {
     namespace = "com.example.mobile"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 34  // Set this explicitly if not coming from Flutter config
+    ndkVersion = "21.3.6528147"  // Define explicitly if needed
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -28,38 +28,80 @@ android {
 
     defaultConfig {
         applicationId = "com.example.mobile"
-        minSdk = 28
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 28  // Ensure this is the minimum supported by both Flutter and Firebase
+        targetSdk = 34  // Set explicitly if flutter.targetSdkVersion isn't working
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug // Use debug signing config for now
+            signingConfig = signingConfigs.debug  // You may want to configure release signing keys later
         }
     }
 }
 
+
+//android {
+//    namespace = "com.example.mobile"
+//    compileSdk = flutter.compileSdkVersion
+//    ndkVersion = flutter.ndkVersion
+//
+//    compileOptions {
+//        sourceCompatibility = JavaVersion.VERSION_1_8
+//        targetCompatibility = JavaVersion.VERSION_1_8
+//    }
+//
+//    defaultConfig {
+//        applicationId = "com.example.mobile"
+//        minSdk = 28
+//        targetSdk = flutter.targetSdkVersion
+//        versionCode = flutterVersionCode.toInteger()
+//        versionName = flutterVersionName
+//    }
+//
+//    buildTypes {
+//        release {
+//            signingConfig = signingConfigs.debug // Use debug signing config for now
+//        }
+//    }
+//}
+
 flutter {
     source = "../.."
 }
-
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.5.1')
 
-    // Exclude Kotlin libraries to avoid conflicts
+    // Firebase Analytics dependency
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // Downgraded appcompat libraries to avoid conflicts
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat-resources:1.6.1'
+
+    // Exclude Kotlin libraries to avoid conflicts (only if Kotlin isn't needed)
     configurations.all {
         exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk7"
         exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
     }
-
-    // Firebase dependencies
-    implementation 'com.google.firebase:firebase-analytics'
-
-    // Hạ phiên bản appcompat và appcompat-resources
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.appcompat:appcompat-resources:1.6.1'
 }
+
+//dependencies {
+//    implementation platform('com.google.firebase:firebase-bom:33.5.1')
+//
+//    // Exclude Kotlin libraries to avoid conflicts
+//    configurations.all {
+//        exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk7"
+//        exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
+//    }
+//
+//    // Firebase dependencies
+//    implementation 'com.google.firebase:firebase-analytics'
+//
+//    // Hạ phiên bản appcompat và appcompat-resources
+//    implementation 'androidx.appcompat:appcompat:1.6.1'
+//    implementation 'androidx.appcompat:appcompat-resources:1.6.1'
+//}
 
 apply plugin: 'com.google.gms.google-services'

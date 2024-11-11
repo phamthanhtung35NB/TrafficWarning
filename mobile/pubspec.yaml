@@ -39,6 +39,7 @@ dependencies:
   firebase_auth: ^5.1.4
   #readtime dataase
   firebase_database:  ^11.1.0
+  flutter_tts: ^3.6.0
 
 dev_dependencies:
   flutter_test:
