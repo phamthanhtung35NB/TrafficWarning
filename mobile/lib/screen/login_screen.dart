@@ -73,7 +73,12 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
   }
-
+@override
+void initState() {
+  super.initState();
+  _usernameController.text = 'test@gmail.com'; // Set initial email value
+  _passwordController.text = '123456'; // Set initial password value
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,6 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   image: AssetImage('assets/images/logo.png'),
                 ),
               ),
+              //set email test@gmail.com lúc đăng nhập
               const SizedBox(height: 50.0),
               Container(
                 width: 300.0, // Set the desired width
@@ -102,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
+                    icon: Icon(Icons.email),
                     labelText: 'Email',
                     border: OutlineInputBorder(),
                   ),
@@ -114,6 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
+                    icon: Icon(Icons.lock),
                     labelText: 'Mật khẩu',
                     border: OutlineInputBorder(),
                   ),

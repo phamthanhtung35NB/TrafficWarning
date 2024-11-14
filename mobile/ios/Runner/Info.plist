@@ -41,6 +41,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+    <string>Ứng dụng cần sử dụng camera để chụp ảnh</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Ứng dụng cần sử dụng thư viện ảnh để chọn ảnh</string>
+
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
