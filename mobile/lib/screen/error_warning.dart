@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/screen/dual_camera_screen.dart';
-
+import 'package:mobile/screen/camera_screen.dart';
+import 'package:mobile/screen/liveness_detection.dart';
 class ErrorWarning extends StatefulWidget {
   const ErrorWarning({super.key});
 
@@ -38,12 +39,13 @@ class _ErrorWarningState extends State<ErrorWarning> {
                 print('Chụp ảnh');
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => DualCameraScreen()),
+                  MaterialPageRoute(builder: (context) => LivenessDetectionScreen()),
                 );
               },
               child: const Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
+
                 children: [
                   Text("Chụp ảnh"),
                   Icon(Icons.camera_alt),
