@@ -58,9 +58,12 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     // final InputImageRotation rotation =
     //     InputImageRotationMethods.fromRawValue(_cameraController!.description.sensorOrientation) ??
     //         InputImageRotation.rotation0deg;
-    final InputImageRotation rotation = InputImageRotationMethods.fromRawValue(
-            _cameraController!.description.sensorOrientation) ??
-        InputImageRotation.Rotation_0deg;
+    final rotation = _cameraController?.description?.sensorOrientation != null
+        ? InputImageRotationMethods.fromRawValue(
+        _cameraController!.description.sensorOrientation) ??
+        InputImageRotation.Rotation_0deg
+        : InputImageRotation.Rotation_0deg;
+
 
     final InputImage inputImage = _convertCameraImage(image, rotation);
     final List<Face> faces = await _faceDetector!.processImage(inputImage);
