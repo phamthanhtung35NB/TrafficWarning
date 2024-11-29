@@ -54,6 +54,25 @@ const int COI = 15;
 
 const int C1 = 19;
 const int C2 = 23;
+
+
+
+// Khai báo thêm chân cảm biến GUVA-S12SD
+const int uvPin = 33; // Chân OUT của cảm biến UV được nối với GPIO33 của ESP32
+
+// Hàm đọc giá trị UV
+float readUVIntensity() {
+  int uvAnalogValue = analogRead(uvPin); // Đọc giá trị tín hiệu analog từ cảm biến
+  float voltage = uvAnalogValue * (3.3 / 4095.0); // Quy đổi giá trị ADC sang điện áp (ESP32 dùng 12-bit ADC)
+  float uvIntensity = voltage * 307.69; // Quy đổi điện áp sang cường độ UV (mW/m²)
+  Serial.print("UV Voltage: ");
+  Serial.print(voltage);
+  Serial.print(" V | UV Intensity: ");
+  Serial.print(uvIntensity);
+  Serial.println(" mW/m^2");
+  return uvIntensity;
+}
+
 bool getRain() {
   // Read analog values from each sensor
   int Value = analogRead(RAIN_SENSOR_PIN_MUA);
@@ -75,7 +94,7 @@ bool getNgap() {
 
 // Function to read sensor levels and return a combined level (1-9)
 void getWaterLevel() {
-  if (getNgap() == true) {
+  // if (getNgap() == true) {
     // Đọc áp suất hiện tại từ cảm biến
     float currentPressure = bmp.readPressure();
 
@@ -101,18 +120,17 @@ void getWaterLevel() {
 
     // Delay 1 giây trước khi đọc lần tiếp theo
     delay(1000);
-
-    if (depthInCm > 30) {
-      level = 3;
-    } else if (depthInCm > 20) {
+level = 0;
+    if (depthInCm > 20) {
       level = 2;
-    } else {
+    } else if (depthInCm > 10) {
       level = 1;
     }
-  } else {
-    level = 0;
+  // } else {
+    // level = 0;
+    
     return;
-  }
+  // }
 }
 
 bool initWifi() {
@@ -212,7 +230,7 @@ void setup() {
   digitalWrite(C1, 1);
   digitalWrite(C2, 1);
   // Khởi động kết nối wifi
-  if (initWifi()) {
+  if (initWifi()) { 
     Serial.println("1");
     //khởi động firebase
     // initFirebase();
@@ -240,7 +258,8 @@ void setup() {
   digitalWrite(C2, 0);
 }
 //mưa, ngập, mức độ cảnh báo, độ cao của nước
-void pushData(bool mua, bool ngap, int waterLevel, int Cm) {
+// Hàm push dữ liệu lên Firebase (cập nhật thêm UV)
+void pushData(bool mua, bool ngap, int waterLevel, int Cm, float uv) {
   if (!Firebase.ready()) {
     Serial.println("Firebase is not ready!");
     return;
@@ -249,6 +268,9 @@ void pushData(bool mua, bool ngap, int waterLevel, int Cm) {
   json.set("level", waterLevel);
   json.set("ngap", ngap);
   json.set("waterDepth", Cm);
+  json.set("uv", uv); // Thêm giá trị UV vào JSON
+  json.set("other", "");
+
   // Push data to Firebase under the node named after the MAC address
   String path = "/devices/" + macAddress;  // Path in Firebase
   if (Firebase.RTDB.setJSON(&fbdo, path.c_str(), &json)) {
@@ -258,18 +280,6 @@ void pushData(bool mua, bool ngap, int waterLevel, int Cm) {
     Serial.println("Reason: " + fbdo.errorReason());
   }
 }
-// void pushData() {
-//   json.set("level", waterLevel);
-//   json.set("other", other);
-//   // Push data to Firebase under the node named after the MAC address
-//   String path = "/devices/" + macAddress;  // Path in Firebase
-//   if (Firebase.RTDB.setJSON(&fbdo, path.c_str(), &json)) {
-//     Serial.println("Data sent to Firebase successfully.");
-//   } else {
-//     Serial.println("Failed to send data to Firebase.");
-//     Serial.println("Reason: " + fbdo.errorReason());
-//   }
-// }
 void loop() {
   // Kiểm tra trạng thái nạp
   if (digitalRead(NAP_PIN) == LOW) {
@@ -277,7 +287,22 @@ void loop() {
       lastMillis = millis();
       depthInCm = 0;
       getWaterLevel();
-      pushData(getRain(), getNgap(), level, depthInCm);
+
+      // Điều khiển đèn cảnh báo
+      if (level > 1) {
+        digitalWrite(C1, 1);
+        digitalWrite(C2, 1);
+      } else if (level > 2) {
+        digitalWrite(C2, 1);
+        digitalWrite(C1, 0);
+      } else {
+        digitalWrite(C1, 0);
+        digitalWrite(C2, 0);
+      }
+
+      // Đọc giá trị UV và gửi lên Firebase
+      float uv = readUVIntensity();
+      pushData(getRain(), getNgap(), level, depthInCm, uv);
     }
   } else {
     // Nếu chân NAP_PIN ở mức HIGH, tiến hành nạp dữ liệu từ HardwareSerial

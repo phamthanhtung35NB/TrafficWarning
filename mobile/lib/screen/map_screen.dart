@@ -42,6 +42,24 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  void _zoomIn() {
+    _mapController.mapController.move(
+      _mapController.mapController.center,
+      _mapController.mapController.zoom + 1,
+    );
+  }
+
+  void _zoomOut() {
+    _mapController.mapController.move(
+      _mapController.mapController.center,
+      _mapController.mapController.zoom - 1,
+    );
+  }
+
+  void _viewList(){
+
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -110,13 +128,44 @@ class _MapScreenState extends State<MapScreen> {
 
           ],
         ),
-        // Nút để di chuyển đến vị trí hiện tại
         Positioned(
           bottom: 20,
           right: 20,
           child: FloatingActionButton(
+
             onPressed: _moveToCurrentLocation,
-            child: const Icon(Icons.my_location),
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.my_location, color: Colors.blue),
+          ),
+        ),
+        Positioned(
+          bottom: 100,
+          right: 20,
+          child: Column(
+            children: [
+              FloatingActionButton(
+                onPressed: _zoomIn,
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.zoom_in),
+              ),
+              const SizedBox(height: 10),
+              FloatingActionButton(
+                onPressed: _zoomOut,
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.zoom_out),
+              ),
+              const SizedBox(height: 10),const SizedBox(height: 10),const SizedBox(height: 10),
+            ],
+          ),
+        ),
+
+        Positioned(
+          bottom: 20,
+          left: 20,
+          child: FloatingActionButton(
+            onPressed: _viewList,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.list),
           ),
         ),
       ],

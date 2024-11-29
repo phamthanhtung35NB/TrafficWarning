@@ -117,7 +117,7 @@ class _ErrorWarningState extends State<ErrorWarning> {
                         value: true,
                         onChanged: (bool? value) {},
                       ),
-                      const Text('Gửi báo cáo ẩn danh'),
+                      const Text('Gửi báo cáo'),
                     ],
                   ),
                 ),
