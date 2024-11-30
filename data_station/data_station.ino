@@ -30,8 +30,8 @@ Adafruit_BMP085 bmp;
 
 // Biến để lưu áp suất ban đầu (khi không ở trong nước)
 float initialPressure = 0;
-const float waterDensity = 997;  // mật độ nước (kg/m^3)
-const float gravity = 9.81;      // gia tốc trọng trường (m/s^2)
+const float waterDensity = 1000;  // mật độ nước (kg/m^3)
+const float gravity = 9.71;       // gia tốc trọng trường (m/s^2)
 
 unsigned long lastMillis = 0;
 const long interval = 5000;  // 5 seconds
@@ -58,13 +58,13 @@ const int C2 = 23;
 
 
 // Khai báo thêm chân cảm biến GUVA-S12SD
-const int uvPin = 33; // Chân OUT của cảm biến UV được nối với GPIO33 của ESP32
+const int uvPin = 33;  // Chân OUT của cảm biến UV được nối với GPIO33 của ESP32
 
 // Hàm đọc giá trị UV
 float readUVIntensity() {
-  int uvAnalogValue = analogRead(uvPin); // Đọc giá trị tín hiệu analog từ cảm biến
-  float voltage = uvAnalogValue * (3.3 / 4095.0); // Quy đổi giá trị ADC sang điện áp (ESP32 dùng 12-bit ADC)
-  float uvIntensity = voltage * 307.69; // Quy đổi điện áp sang cường độ UV (mW/m²)
+  int uvAnalogValue = analogRead(uvPin);         // Đọc giá trị tín hiệu analog từ cảm biến
+  float voltage = uvAnalogValue * (5 / 4095.0);  // Quy đổi giá trị ADC sang điện áp (ESP32 dùng 12-bit ADC)
+  float uvIntensity = voltage * 307.69;          // Quy đổi điện áp sang cường độ UV (mW/m²)
   Serial.print("UV Voltage: ");
   Serial.print(voltage);
   Serial.print(" V | UV Intensity: ");
@@ -76,7 +76,10 @@ float readUVIntensity() {
 bool getRain() {
   // Read analog values from each sensor
   int Value = analogRead(RAIN_SENSOR_PIN_MUA);
-  if (Value < 3000) {
+  Serial.print("Get mua: ");
+  Serial.println(Value);
+  if (Value < 2500) {
+    Serial.println("mưa");
     return true;
   } else {
     return false;
@@ -85,7 +88,9 @@ bool getRain() {
 bool getNgap() {
   // Read analog values from each sensor
   int Value = analogRead(RAIN_SENSOR_PIN_NGAP);
+  
   if (Value < 3000) {
+    
     return true;
   } else {
     return false;
@@ -95,41 +100,42 @@ bool getNgap() {
 // Function to read sensor levels and return a combined level (1-9)
 void getWaterLevel() {
   // if (getNgap() == true) {
-    // Đọc áp suất hiện tại từ cảm biến
-    float currentPressure = bmp.readPressure();
+  // Đọc áp suất hiện tại từ cảm biến
+  float currentPressure = bmp.readPressure();
 
-    // Tính sự chênh lệch áp suất (áp suất trong nước lớn hơn)
-    float pressureDifference = currentPressure - initialPressure;
+  // Tính sự chênh lệch áp suất (áp suất trong nước lớn hơn)
+  float pressureDifference = currentPressure - initialPressure;
 
-    // Tính toán độ sâu nước dựa trên sự chênh lệch áp suất
-    // Công thức: độ sâu (m) = áp suất chênh lệch (Pa) / (mật độ nước * gia tốc trọng trường)
-    float depth = pressureDifference / (waterDensity * gravity);
+  // Tính toán độ sâu nước dựa trên sự chênh lệch áp suất
+  // Công thức: độ sâu (m) = áp suất chênh lệch (Pa) / (mật độ nước * gia tốc trọng trường)
+  float depth = pressureDifference / (waterDensity * gravity);
 
-    // Đổi đơn vị độ sâu từ mét sang cm
-    depthInCm = depth * 100;
+  // Đổi đơn vị độ sâu từ mét sang cm
+  depthInCm = 2+(depth * 100);
 
-    // In kết quả độ sâu ra màn hình serial với 4 chữ số sau dấu phẩy
-    Serial.print("Áp suất ban đầu (Pa): ");
-    Serial.println(initialPressure);
-    Serial.print("Áp suất hiện tại (Pa): ");
-    Serial.println(currentPressure);
-    Serial.print("Chênh lệch áp suất (Pa): ");
-    Serial.println(pressureDifference);
-    Serial.print("Độ sâu nước (cm): ");
-    Serial.println(depthInCm, 4);  // In ra với 4 chữ số sau dấu phẩy
+  // In kết quả độ sâu ra màn hình serial với 4 chữ số sau dấu phẩy
+  Serial.print("Áp suất ban đầu (Pa): ");
+  Serial.println(initialPressure);
+  Serial.print("Áp suất hiện tại (Pa): ");
+  Serial.println(currentPressure);
+  Serial.print("Chênh lệch áp suất (Pa): ");
+  Serial.println(pressureDifference);
+  Serial.print("Độ sâu nước (cm): ");
+  Serial.println(depthInCm, 4);  // In ra với 4 chữ số sau dấu phẩy
 
-    // Delay 1 giây trước khi đọc lần tiếp theo
-    delay(1000);
-level = 0;
-    if (depthInCm > 20) {
-      level = 2;
-    } else if (depthInCm > 10) {
-      level = 1;
-    }
-  // } else {
-    // level = 0;
-    
-    return;
+  // Delay 1 giây trước khi đọc lần tiếp theo
+  delay(1000);
+  level = 0;
+  if (depthInCm >= 45) {
+    level = 2;
+  } else if (depthInCm >= 30) {
+    level = 1;
+  }
+
+  else {
+    level = 0;
+  }
+  return;
   // }
 }
 
@@ -192,7 +198,8 @@ void initBmp() {
   }
 
   // Lấy áp suất hiện tại khi cảm biến chưa nhúng vào nước
-  initialPressure = bmp.readPressure();
+  // initialPressure = bmp.readPressure();
+  initialPressure=101396.00;
   Serial.print("Áp suất ban đầu (Pa): ");
   Serial.println(initialPressure);
 
@@ -230,7 +237,7 @@ void setup() {
   digitalWrite(C1, 1);
   digitalWrite(C2, 1);
   // Khởi động kết nối wifi
-  if (initWifi()) { 
+  if (initWifi()) {
     Serial.println("1");
     //khởi động firebase
     // initFirebase();
@@ -268,7 +275,7 @@ void pushData(bool mua, bool ngap, int waterLevel, int Cm, float uv) {
   json.set("level", waterLevel);
   json.set("ngap", ngap);
   json.set("waterDepth", Cm);
-  json.set("uv", uv); // Thêm giá trị UV vào JSON
+  json.set("uv", uv);  // Thêm giá trị UV vào JSON
   json.set("other", "");
 
   // Push data to Firebase under the node named after the MAC address
@@ -289,10 +296,10 @@ void loop() {
       getWaterLevel();
 
       // Điều khiển đèn cảnh báo
-      if (level > 1) {
+      if (level == 1) {
         digitalWrite(C1, 1);
         digitalWrite(C2, 1);
-      } else if (level > 2) {
+      } else if (level == 2) {
         digitalWrite(C2, 1);
         digitalWrite(C1, 0);
       } else {
