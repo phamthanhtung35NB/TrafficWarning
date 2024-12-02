@@ -1,9 +1,5 @@
 import 'dart:async';
-import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
-import 'dart:async';
+import 'dart:math' as math;
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -19,18 +15,21 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
   FaceDetector? _faceDetector;
   bool _isDetecting = false;
   bool _isLivenessDetected = false;
-  bool _leftEyeClosed = false;
-  bool _rightEyeClosed = false;
-  Timer? _timer;
+  int _faceCount = 0; // Biến để lưu số lượng khuôn mặt phát hiện được
+  double _leftEyeOpenProbability = 0.0;
+  double _rightEyeOpenProbability = 0.0;
   List<CameraDescription>? _cameras;
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
-    _faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
-      enableClassification: true, // Bật tính năng phân loại mắt mở/đóng
-    ));
+    _faceDetector = GoogleMlKit.vision.faceDetector(
+      FaceDetectorOptions(
+        enableClassification: true, // Phân loại mắt mở/đóng
+        enableTracking: true,       // Theo dõi khuôn mặt
+      ),
+    );
   }
 
   Future<void> _initializeCamera() async {
@@ -38,7 +37,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     if (_cameras != null && _cameras!.isNotEmpty) {
       _cameraController = CameraController(
         _cameras![1], // Camera trước
-        ResolutionPreset.medium,
+        ResolutionPreset.high, // Chế độ phân giải cao
       );
       await _cameraController?.initialize();
       setState(() {});
@@ -54,57 +53,52 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
   }
 
   Future<void> _detectFaces(CameraImage image) async {
-    // Chuyển đổi ảnh Camera thành định dạng cần thiết cho ML Kit
-    // final InputImageRotation rotation =
-    //     InputImageRotationMethods.fromRawValue(_cameraController!.description.sensorOrientation) ??
-    //         InputImageRotation.rotation0deg;
-    final rotation = _cameraController?.description?.sensorOrientation != null
-        ? InputImageRotationMethods.fromRawValue(
-        _cameraController!.description.sensorOrientation) ??
-        InputImageRotation.Rotation_0deg
-        : InputImageRotation.Rotation_0deg;
+    try {
+      final rotation = _cameraController?.description.sensorOrientation != null
+          ? InputImageRotationMethods.fromRawValue(
+          _cameraController!.description.sensorOrientation) ??
+          InputImageRotation.Rotation_0deg
+          : InputImageRotation.Rotation_0deg;
 
+      final InputImage inputImage = _convertCameraImage(image, rotation);
+      final List<Face> faces = await _faceDetector!.processImage(inputImage);
 
-    final InputImage inputImage = _convertCameraImage(image, rotation);
-    final List<Face> faces = await _faceDetector!.processImage(inputImage);
+      setState(() {
+        _faceCount = faces.length; // Cập nhật số khuôn mặt phát hiện được
+      });
 
-    if (faces.isNotEmpty) {
-      final face = faces[0];
-      _checkLiveness(face);
+      if (faces.isNotEmpty) {
+        final face = faces[0];
+        _checkLiveness(face);
+      }
+    } catch (e) {
+      print('Lỗi khi phát hiện khuôn mặt: $e');
+    } finally {
+      _isDetecting = false;
     }
-
-    _isDetecting = false;
   }
 
   InputImage _convertCameraImage(
       CameraImage image, InputImageRotation rotation) {
-    final WriteBuffer allBytes = WriteBuffer();
-    for (Plane plane in image.planes) {
-      allBytes.putUint8List(plane.bytes);
-    }
-    final bytes = allBytes.done().buffer.asUint8List();
+    final planes = image.planes;
+    final bytes = planes[0].bytes; // Lấy bytes từ plane đầu tiên
+    final imageSize = Size(image.width.toDouble(), image.height.toDouble());
 
-    final Size imageSize =
-        Size(image.width.toDouble(), image.height.toDouble());
-
-    final planeData = image.planes.map(
-      (Plane plane) {
-        return InputImagePlaneMetadata(
-          bytesPerRow: plane.bytesPerRow,
-          height: plane.height,
-          width: plane.width,
-        );
-      },
-    ).toList();
+    final planeData = planes.map((Plane plane) {
+      return InputImagePlaneMetadata(
+        bytesPerRow: plane.bytesPerRow,
+        height: plane.height,
+        width: plane.width,
+      );
+    }).toList();
 
     return InputImage.fromBytes(
       bytes: bytes,
       inputImageData: InputImageData(
         size: imageSize,
         imageRotation: rotation,
-        inputImageFormat:
-            InputImageFormatMethods.fromRawValue(image.format.raw) ??
-                InputImageFormat.NV21,
+        inputImageFormat: InputImageFormatMethods.fromRawValue(image.format.raw) ??
+            InputImageFormat.NV21,
         planeData: planeData,
       ),
     );
@@ -114,33 +108,27 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     final leftEyeOpenProbability = face.leftEyeOpenProbability;
     final rightEyeOpenProbability = face.rightEyeOpenProbability;
 
-    // In ra giá trị của xác suất mắt mở
-    print('Left Eye Open Probability: $leftEyeOpenProbability');
-    print('Right Eye Open Probability: $rightEyeOpenProbability');
+    setState(() {
+      _leftEyeOpenProbability = leftEyeOpenProbability ?? 0.0;
+      _rightEyeOpenProbability = rightEyeOpenProbability ?? 0.0;
+    });
 
-    if (leftEyeOpenProbability != null && rightEyeOpenProbability != null) {
-      if (leftEyeOpenProbability < 0.5 && rightEyeOpenProbability < 0.5) {
-        _leftEyeClosed = true;
-        _rightEyeClosed = true;
-      }
-
-      if (_leftEyeClosed &&
-          _rightEyeClosed &&
-          leftEyeOpenProbability > 0.8 &&
-          rightEyeOpenProbability > 0.8) {
-        setState(() {
-          _isLivenessDetected = true;
-        });
-        _showLivenessResult();
-      }
+    if (leftEyeOpenProbability != null &&
+        rightEyeOpenProbability != null &&
+        leftEyeOpenProbability > 0.5 &&
+        rightEyeOpenProbability > 0.5) {
+      setState(() {
+        _isLivenessDetected = true;
+      });
+      // _showLivenessResult();
     }
   }
 
   void _showLivenessResult() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Liveness Detected: Mắt đã được mở!'),
-        duration: Duration(seconds: 2),
+        content: Text('Liveness Detected!'),
+        duration: Duration(seconds: 1),
       ),
     );
   }
@@ -160,17 +148,47 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
       ),
       body: _cameraController != null && _cameraController!.value.isInitialized
           ? Stack(
-              children: [
-                CameraPreview(_cameraController!),
-                if (_isLivenessDetected)
-                  Center(
-                    child: Text(
-                      'Liveness Detected!',
-                      style: TextStyle(fontSize: 24, color: Colors.green),
-                    ),
-                  ),
-              ],
-            )
+        children: [
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationY(math.pi), // Lật ảnh camera trước
+            child: CameraPreview(_cameraController!),
+          ),
+          if (_isLivenessDetected)
+            Positioned(
+              top: 90,
+              left: 20,
+              child: Text(
+                'Đã nhận diện người thật: $_isLivenessDetected',
+                style: TextStyle(fontSize: 24, color: Colors.green),
+              ),
+            ),
+          Positioned(
+            top: 20,
+            left: 20,
+            child: Text(
+              'Số khuôn mặt phát hiện được: $_faceCount',
+              style: TextStyle(fontSize: 18, color: Colors.black),
+            ),
+          ),
+          Positioned(
+            top: 70,
+            left: 20,
+            child: Text(
+              'Mắt trái mở: ${_leftEyeOpenProbability.toStringAsFixed(2)}',
+              style: TextStyle(fontSize: 18, color: Colors.black),
+            ),
+          ),
+          Positioned(
+            top: 50,
+            left: 20,
+            child: Text(
+              'Mắt phải mở: ${_rightEyeOpenProbability.toStringAsFixed(2)}',
+              style: TextStyle(fontSize: 18, color: Colors.black),
+            ),
+          ),
+        ],
+      )
           : Center(child: CircularProgressIndicator()),
     );
   }
