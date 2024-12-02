@@ -92,32 +92,32 @@ class _CameraScreenState extends State<CameraScreen> {
       ),
       body: _isCameraInitialized
           ? Stack(
-        children: [
-          CameraPreview(_cameraController!),
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _checkLiveness,
-                    child: Text("Kiểm tra liveness"),
+              children: [
+                CameraPreview(_cameraController!),
+                Positioned(
+                  bottom: 20,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: _checkLiveness,
+                          child: Text("Kiểm tra liveness"),
+                        ),
+                        ElevatedButton(
+                          onPressed: _takePicture,
+                          child: Icon(Icons.camera),
+                        ),
+                      ],
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: _takePicture,
-                    child: Icon(Icons.camera),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      )
+                ),
+              ],
+            )
           : Center(
-        child: CircularProgressIndicator(),
-      ),
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }

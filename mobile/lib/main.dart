@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobile/screen/login_screen.dart';
 import 'package:mobile/screen/home_screen.dart';
+import 'package:mobile/screen/register_screen.dart';
 import 'config.dart';
 
 void main() async {
@@ -32,12 +33,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ULISync',
+      title: 'Traffic Warning',
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginScreen(),
         '/home_screen': (context) => const HomeScreen(),
         '/login_screen': (context) => const LoginScreen(),
+        '/register_screen': (context) => const RegisterScreen(),
       },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

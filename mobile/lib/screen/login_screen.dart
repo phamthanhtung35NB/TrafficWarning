@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/controller/login_controller.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,7 +12,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _otpController = TextEditingController();
   final LoginController _loginController = LoginController();
+  String? _verificationId;
 
   Future<void> _login() async {
     String? result = await _loginController.login(
@@ -22,9 +25,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result != null) {
       print("UID: $result");
-      if (result.length == 28) { // Assuming UID is 28 characters long
+      if (result.length == 28) {
         Navigator.pushNamed(context, '/home_screen', arguments: result);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login successful. UID: $result')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result)),
+        );
+      }
+    }
+  }
 
+  Future<void> _loginWithGoogle() async {
+    String? result = await _loginController.loginWithGoogle();
+
+    if (result != null) {
+      print("UID: $result");
+      if (result.length == 28) {
+        Navigator.pushNamed(context, '/home_screen', arguments: result);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login successful. UID: $result')),
         );
@@ -73,22 +93,24 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
   }
-@override
-void initState() {
-  super.initState();
-  _usernameController.text = 'test@gmail.com'; // Set initial email value
-  _passwordController.text = '123456'; // Set initial password value
-}
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.text = 'test@gmail.com';
+    _passwordController.text = '123456';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Đăng nhập'),
       ),
-      // set từ trên xuống
-      body: Center(
-        //paddiing top 100
-        child: Padding(
+      body: Stack(
+        alignment: Alignment.center,
+        fit: StackFit.expand,
+        children:[ Padding(
           padding: const EdgeInsets.only(top: 0.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -100,10 +122,9 @@ void initState() {
                   image: AssetImage('assets/images/logo.png'),
                 ),
               ),
-              //set email test@gmail.com lúc đăng nhập
               const SizedBox(height: 50.0),
               Container(
-                width: 300.0, // Set the desired width
+                width: 300.0,
                 height: 50.0,
                 child: TextField(
                   controller: _usernameController,
@@ -116,7 +137,7 @@ void initState() {
               ),
               const SizedBox(height: 16.0),
               Container(
-                width: 300.0, // Set the desired width
+                width: 300.0,
                 height: 50.0,
                 child: TextField(
                   controller: _passwordController,
@@ -133,16 +154,61 @@ void initState() {
                 onPressed: _login,
                 child: const Text('Đăng nhập'),
               ),
+              const SizedBox(height: 16.0),
+              // hiện text hoặc đăng nhập bằng Google, gạch chân dưới chữ
+              const Text('Hoặc đăng nhập bằng', style: TextStyle(fontSize: 14, color: Colors.grey)),
+              ElevatedButton.icon(
+                onPressed: _loginWithGoogle,
+                icon: SvgPicture.network(
+                  'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
+                  height: 24.0,
+                  width: 24.0,
+                ),
+                label: const Text(
+                  'Đăng nhập bằng Google',
+                  style: TextStyle(fontSize: 16),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white, // Nền trắng
+                  foregroundColor: Colors.black, // Chữ màu đen
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    side: BorderSide(color: Colors.grey.shade300), // Viền mỏng
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                ),
+              ),
+
+              const SizedBox(height: 16.0),
+
+
+              const SizedBox(height: 10.0),
+            ],
+          ),
+        ),
+        Positioned(
+          bottom: 20,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
               TextButton(
                 onPressed: _resetPassword,
                 child: const Text('Bạn quên mật khẩu?'),
               ),
-              const SizedBox(height: 10.0),
-
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register_screen');
+                },
+                child: const Text('Đăng ký ngay?'),
+              ),
             ],
           ),
         ),
+        ]
       ),
+
+
+
     );
   }
 }

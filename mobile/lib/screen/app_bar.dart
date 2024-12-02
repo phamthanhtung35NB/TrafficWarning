@@ -20,7 +20,7 @@ class AppBarScreen extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         children: [
           TextButton(
-            child: const Text("Home", style: TextStyle(color: Colors.white)),
+            child: const Text("Home", style: TextStyle(color: Colors.black)),
             onPressed: () {
               // Navigate to Home screen
             },
