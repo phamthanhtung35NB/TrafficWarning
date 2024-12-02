@@ -13,6 +13,10 @@ class _CameraScreenState extends State<CameraScreen> {
   List<CameraDescription>? cameras;
   bool _isCameraInitialized = false;
   bool _isLivenessDetected = false;
+  double _zoomLevel = 1.0;
+  double _minZoom = 1.0;
+  double _maxZoom = 1.0;
+  bool _isFlashOn = false;
 
   @override
   void initState() {
@@ -30,6 +34,9 @@ class _CameraScreenState extends State<CameraScreen> {
       );
 
       await _cameraController?.initialize();
+      _minZoom = await _cameraController!.getMinZoomLevel();
+      _maxZoom = await _cameraController!.getMaxZoomLevel();
+
       setState(() {
         _isCameraInitialized = true;
       });
@@ -38,21 +45,59 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  void _zoomIn() {
+    print("Zoom Level: $_zoomLevel");
+
+    if (_zoomLevel < _maxZoom) {
+      setState(() {
+        _zoomLevel += 1;
+        _cameraController?.setZoomLevel(_zoomLevel.clamp(_minZoom, _maxZoom));
+      });
+    }
+  }
+
+  void _zoomOut() {
+    print("Zoom Level: $_zoomLevel");
+
+    if (_zoomLevel > _minZoom) {
+      setState(() {
+        _zoomLevel -= 1;
+        _cameraController?.setZoomLevel(_zoomLevel.clamp(_minZoom, _maxZoom));
+      });
+    }
+  }
+
+  void _toggleFlash() async {
+    _isFlashOn = !_isFlashOn;
+    await _cameraController?.setFlashMode(
+      _isFlashOn ? FlashMode.torch : FlashMode.off,
+    );
+    setState(() {});
+  }
+
   Future<void> _takePicture() async {
-    if (!_cameraController!.value.isInitialized || !_isLivenessDetected) {
+    if (!_cameraController!.value.isInitialized) {
       return;
     }
     try {
       final XFile image = await _cameraController!.takePicture();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PreviewScreen(imagePath: image.path),
-        ),
-      );
+      Navigator.pop(context, image.path); // Trả về đường dẫn ảnh
     } catch (e) {
       print('Không thể chụp ảnh: $e');
     }
+  }
+
+
+  void _handlePinchZoom(ScaleUpdateDetails details) {
+    double newZoomLevel = _zoomLevel * details.scale;
+
+    // Giới hạn zoom trong khoảng cho phép
+    newZoomLevel = newZoomLevel.clamp(_minZoom, _maxZoom);
+
+    setState(() {
+      _zoomLevel = newZoomLevel;
+      _cameraController?.setZoomLevel(_zoomLevel);
+    });
   }
 
   @override
@@ -61,61 +106,104 @@ class _CameraScreenState extends State<CameraScreen> {
     super.dispose();
   }
 
-  Future<void> _checkLiveness() async {
-    final faceDetector = GoogleMlKit.vision.faceDetector(
-      FaceDetectorOptions(enableClassification: true),
-    );
-
-    if (_cameraController != null && _cameraController!.value.isInitialized) {
-      final cameraImage = await _cameraController!.takePicture();
-      final inputImage = InputImage.fromFilePath(cameraImage.path);
-      final faces = await faceDetector.processImage(inputImage);
-
-      if (faces.isNotEmpty) {
-        // Assume liveness if a face is detected
-        setState(() {
-          _isLivenessDetected = true;
-        });
-      } else {
-        setState(() {
-          _isLivenessDetected = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tích hợp camera vào ứng dụng'),
+        title: const Align(
+          alignment: Alignment.center,
+          child: Text('Chụp ảnh hiện trường',
+              style: TextStyle(color: Colors.black)),
+        ),
       ),
       body: _isCameraInitialized
-          ? Stack(
-              children: [
-                CameraPreview(_cameraController!),
-                Positioned(
-                  bottom: 20,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Column(
+          ? GestureDetector(
+              onScaleUpdate: (ScaleUpdateDetails details) {
+                _handlePinchZoom(details);
+              },
+              child: Stack(
+                children: [
+                  CameraPreview(_cameraController!),
+                  Positioned(
+                    bottom: 70,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      // Căn đều 2 bên
                       children: [
-                        ElevatedButton(
-                          onPressed: _checkLiveness,
-                          child: Text("Kiểm tra liveness"),
+                        IconButton(
+                          icon: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black, // background color
+                              borderRadius:
+                                  BorderRadius.circular(10), // optional
+                            ),
+                            child: const Icon(Icons.remove,
+                                color: Colors.white, size: 40),
+                          ),
+                          onPressed: _zoomOut,
                         ),
-                        ElevatedButton(
-                          onPressed: _takePicture,
-                          child: Icon(Icons.camera),
+                        Text(
+                          '${_zoomLevel.toStringAsFixed(1)}x',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 19),
+                        ),
+                        IconButton(
+                          icon: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black, // background color
+                              borderRadius:
+                                  BorderRadius.circular(10), // optional
+                            ),
+                            child: const Icon(Icons.add,
+                                color: Colors.white, size: 40),
+                          ),
+                          onPressed: _zoomIn,
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 10,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      // Căn đều 2 bên
+                      children: [
+                        ElevatedButton(
+                          //size: 50,
+
+                          onPressed: _takePicture,
+                          child: const Icon(Icons.camera,
+                              color: Colors.black, size: 40),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: IconButton(
+                      //size: 50,
+                      iconSize: 40,
+                      icon: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        child: Icon(
+                          _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                          color: Colors.black,
+                        ),
+                      ),
+                      onPressed: _toggleFlash,
+                    ),
+                  ),
+                ],
+              ),
             )
-          : Center(
+          : const Center(
               child: CircularProgressIndicator(),
             ),
     );

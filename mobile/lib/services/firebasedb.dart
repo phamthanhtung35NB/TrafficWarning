@@ -1,5 +1,10 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'dart:io';
 
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+import '../model/user_reports.dart';
+//fire basedb.dart
 class Firebasedb {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
 
@@ -23,4 +28,41 @@ void listenToDeviceChanges(void Function(Map<String, dynamic>) onData) {
     }
   });
 }
+  Future<String> uploadImage(String filePath, String uid, String fileName) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final imageRef = storageRef.child('imageReports/$uid/$fileName');
+      File file = File(filePath);
+
+      await imageRef.putFile(file);
+
+      // Lấy link tải ảnh sau khi tải lên
+      return await imageRef.getDownloadURL();
+    } catch (e) {
+      print('Error uploading image: $e');
+      throw Exception('Failed to upload image');
+    }
+  }
+
+  Future<void> saveUserReport(UserReports report) async {
+    final databaseRef = FirebaseDatabase.instance.ref();
+    final reportRef = databaseRef.child('imageReports/${report.uid}/${report.ngayThangNam}');
+
+    await reportRef.set({
+      'uid': report.uid,
+      'email': report.email,
+      'hoVaTen': report.hoVaTen,
+      'linkFaceId': report.linkFaceId,
+      'namsinh': report.namsinh,
+      'sdt': report.sdt,
+      'loaiSuCo': report.loaiSuCo,
+      'latitudeLongitude': report.latitudeLongitude,
+      'noiDung': report.noiDung,
+      'thoiGian': report.thoiGian,
+      'ngayThangNam': report.ngayThangNam,
+      'hinhAnh1': report.hinhAnh1,
+      'hinhAnh2': report.hinhAnh2,
+      'hieuLuc': report.hieuLuc,
+    });
+  }
 }
