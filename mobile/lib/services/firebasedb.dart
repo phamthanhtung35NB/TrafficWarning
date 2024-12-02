@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../model/user_reports.dart';
+
 //fire basedb.dart
 class Firebasedb {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
@@ -19,24 +20,28 @@ class Firebasedb {
   }
 
   // Listen to device changes in real-time
-void listenToDeviceChanges(void Function(Map<String, dynamic>) onData) {
-  _database.child('devices').onValue.listen((event) {
-    if (event.snapshot.exists) {
-      onData(Map<String, dynamic>.from(event.snapshot.value as Map));
-    } else {
-      onData({});
-    }
-  });
-}
-  Future<String> uploadImage(String filePath, String uid, String fileName) async {
+  void listenToDeviceChanges(void Function(Map<String, dynamic>) onData) {
+    _database.child('devices').onValue.listen((event) {
+      if (event.snapshot.exists) {
+        onData(Map<String, dynamic>.from(event.snapshot.value as Map));
+      } else {
+        onData({});
+      }
+    });
+  }
+
+  Future<String> uploadImage(
+      String filePath, String ngayThangNam, String uid, String fileName) async {
     try {
       final storageRef = FirebaseStorage.instance.ref();
-      final imageRef = storageRef.child('imageReports/$uid/$fileName');
+      final imageRef =
+          storageRef.child('imageReports/$ngayThangNam/$uid/$fileName');
       File file = File(filePath);
 
       await imageRef.putFile(file);
 
       // Lấy link tải ảnh sau khi tải lên
+      print("đã tải ảnh lên: ${await imageRef.getDownloadURL()}");
       return await imageRef.getDownloadURL();
     } catch (e) {
       print('Error uploading image: $e');
@@ -46,7 +51,8 @@ void listenToDeviceChanges(void Function(Map<String, dynamic>) onData) {
 
   Future<void> saveUserReport(UserReports report) async {
     final databaseRef = FirebaseDatabase.instance.ref();
-    final reportRef = databaseRef.child('imageReports/${report.uid}/${report.ngayThangNam}');
+    final reportRef =
+        databaseRef.child('imageReports/${report.uid}/${report.ngayThangNam}');
 
     await reportRef.set({
       'uid': report.uid,

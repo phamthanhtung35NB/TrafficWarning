@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/screen/dual_camera_screen.dart';
 import 'package:mobile/screen/camera_screen.dart';
@@ -25,6 +27,7 @@ class _ErrorWarningState extends State<ErrorWarning> {
   bool _showOtherField = false;
   TextEditingController _otherIncidentController = TextEditingController();
   final CustomMapController _mapController = CustomMapController();
+
   // String? _firstImagePath; // Lưu đường dẫn ảnh đầu tiên
   // String? _secondImagePath; // Lưu đường dẫn ảnh thứ hai
 
@@ -51,9 +54,100 @@ class _ErrorWarningState extends State<ErrorWarning> {
     }
   }
 
+  // Hàm lấy tên file theo định dạng yêu cầu
+  String generateFileName(int index) {
+    DateTime now = DateTime.now();
+    String formattedDate = "${now.year}"
+        "${now.month.toString().padLeft(2, '0')}"
+        "${now.day.toString().padLeft(2, '0')}"
+        "_"
+        "${now.hour.toString().padLeft(2, '0')}"
+        "${now.minute.toString().padLeft(2, '0')}"
+        "${now.second.toString().padLeft(2, '0')}";
+    return "${formattedDate}_$index.jpg";
+  }
+
+  //summit report
+  Future<void> _submitReport(var user) async {
+    try {
+      if (_firstImagePath.isEmpty || _secondImagePath.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Vui lòng chọn đầy đủ hình ảnh.')),
+        );
+        return;
+      }
+      String uid = user.uid ?? "";
+      if (uid.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Người dùng không xác định.')),
+        );
+        return;
+      }
+
+      String ngayThangNam0 = DateTime.now().toIso8601String();
+
+      // Chuyển đổi thành định dạng không có ký tự đặc biệt
+      print('ngayThangNam gốc: $ngayThangNam0');
+
+      // Chuyển đổi thành định dạng không có ký tự đặc biệt
+      DateTime dateTime = DateTime.parse(ngayThangNam0);
+      String ngayThangNam = "${dateTime.year}"
+          "${dateTime.month.toString().padLeft(2, '0')}"
+          "${dateTime.day.toString().padLeft(2, '0')}"
+          "_"
+          "${dateTime.hour.toString().padLeft(2, '0')}"
+          "${dateTime.minute.toString().padLeft(2, '0')}"
+          "${dateTime.second.toString().padLeft(2, '0')}";
+      print('ngayThangNam mới: $ngayThangNam');
+
+      print('uid: $uid');
+      print('_firstImagePath: $_firstImagePath');
+      print('_secondImagePath: $_secondImagePath');
+      String linkHinhAnh1 = await _firebasedb.uploadImage(
+          _firstImagePath, ngayThangNam, uid, generateFileName(1));
+      String linkHinhAnh2 = await _firebasedb.uploadImage(
+          _secondImagePath, ngayThangNam, uid, generateFileName(2));
+      Position position = await Geolocator.getCurrentPosition();
+      LatLng currentPosition = LatLng(position.latitude, position.longitude);
+
+      // Chuyển đổi vị trí người dùng thành chuỗi định dạng yêu cầu
+      String userLocation =
+          "${currentPosition.latitude.toStringAsFixed(6)}, ${currentPosition.longitude.toStringAsFixed(6)}";
+      print('userLocation: $userLocation');
+      UserReports report = UserReports(
+        uid,
+        user.email ?? "",
+        user.hoVaTen ?? "",
+        user.linkFaceId ?? "",
+        user.namsinh ?? 0,
+        user.sdt ?? "",
+        _selectedIncident == 'Khác'
+            ? _otherIncidentController.text
+            : _selectedIncident,
+        userLocation,
+        "12:00",
+        "12:00",
+        ngayThangNam,
+        linkHinhAnh1,
+        linkHinhAnh2,
+        true,
+      );
+
+      await _firebasedb.saveUserReport(report);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gửi báo cáo thành công!')),
+      );
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gửi báo cáo thất bại: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-
     var user = Provider.of<UserProvider>(context);
     return Scaffold(
       appBar: AppBar(
@@ -165,71 +259,9 @@ class _ErrorWarningState extends State<ErrorWarning> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
-                try {
-                  if (_firstImagePath.isEmpty || _secondImagePath.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Vui lòng chọn đầy đủ hình ảnh.')),
-                    );
-                    return;
-                  }
-
-                  if (_mapController.userLocationMarker == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Không tìm thấy vị trí người dùng.')),
-                    );
-                    return;
-                  }
-
-                  String uid = user.uid ?? "";
-                  if (uid.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Người dùng không xác định.')),
-                    );
-                    return;
-                  }
-
-                  String ngayThangNam = DateTime.now().toIso8601String();
-
-                  String linkHinhAnh1 = await _firebasedb.uploadImage(
-                      _firstImagePath, uid, 'image1.jpg');
-                  String linkHinhAnh2 = await _firebasedb.uploadImage(
-                      _secondImagePath, uid, 'image2.jpg');
-
-                  UserReports report = UserReports(
-                    uid,
-                    user.email ?? "",
-                    user.hoVaTen ?? "",
-                    user.linkFaceId ?? "",
-                    user.namsinh ?? 0,
-                    user.sdt ?? "",
-                    _selectedIncident == 'Khác'
-                        ? _otherIncidentController.text
-                        : _selectedIncident,
-                    _mapController.userLocationMarker!.point.latitude.toString(),
-                    "12:00",
-                    "12:00",
-                    ngayThangNam,
-                    linkHinhAnh1,
-                    linkHinhAnh2,
-                    true,
-                  );
-
-                  await _firebasedb.saveUserReport(report);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Gửi báo cáo thành công!')),
-                  );
-                } catch (e) {
-                  print('Error: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Gửi báo cáo thất bại: $e')),
-                  );
-                }
-              },
+              onPressed: () => _submitReport(user),
               child: const Text('Gửi báo cáo'),
             ),
-
           ],
         ),
       ),
