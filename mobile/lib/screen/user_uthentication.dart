@@ -15,7 +15,8 @@ class UserAuthentication extends StatefulWidget {
 
 class _UserAuthenticationState extends State<UserAuthentication> {
   final _formKey = GlobalKey<FormState>();
-  final _controller = UserAuthenticationStateController();
+
+  // final _controller = UserAuthenticationStateController();
 
   late TextEditingController _hoVaTenController;
   late TextEditingController _sdtController;
@@ -37,14 +38,15 @@ class _UserAuthenticationState extends State<UserAuthentication> {
     _namsinhController.dispose();
     super.dispose();
   }
-Future<void> _setUserData(
-     String uid,
-     String email,
-     String hoVaTen,
-     String linkFaceId,
-     int namsinh,
-     String sdt,
-     bool authenticated,
+
+  Future<void> _setUserData(
+    String uid,
+    String email,
+    String hoVaTen,
+    String linkFaceId,
+    int namsinh,
+    String sdt,
+    bool authenticated,
   ) async {
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
     DocumentReference userRef = _firestore.collection('users').doc(uid);
@@ -52,50 +54,262 @@ Future<void> _setUserData(
     DocumentSnapshot userSnapshot = await userRef.get();
 
     // if (!userSnapshot.exists) {
-      await userRef.set({
-        'uid': uid,
-        'email': email,
-        'hoVaTen': hoVaTen,
-        'linkFaceId': linkFaceId,
-        'namsinh': namsinh,
-        'sdt': sdt,
-        'authenticated': authenticated,
-      });
+    await userRef.set({
+      'uid': uid,
+      'email': email,
+      'hoVaTen': hoVaTen,
+      'linkFaceId': linkFaceId,
+      'namsinh': namsinh,
+      'sdt': sdt,
+      'authenticated': authenticated,
+    });
     // }
+  }
 
-}
-Future<void> _submit() async {
-  var user = Provider.of<UserProvider>(context, listen: false);
-  print("submit");
-  print(_hoVaTenController.text);
-  print(_sdtController.text);
-  print(_namsinhController.text);
-  print(_linkFaceIdController);
+// Hàm hiển thị dialog xác nhận thông tin
+  Future<bool?> _showConfirmationDialog(BuildContext context) {
+    bool _isConfirmed = false; // State to track checkbox
+    bool _isConfirmed2 = false;
+    bool _isConfirmed3 = false;
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              // Increase dialog width and adjust shape
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              // Make the dialog take up more screen space
+              insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 24),
 
-  // if (_formKey.currentState!.validate()) {
-    try {
-      print("trước cập nhật");
-      _setUserData(
-        user.uid,
-        user.email,
-         _hoVaTenController.text,
-       _linkFaceIdController,
-        int.parse(_namsinhController.text),
-         _sdtController.text,
-        true,
-      );
-      //chuyển tới màn hình login
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-      print("đã cập nhật");
-    } catch (e) {
+              title: Text(
+                'Xác Nhận Thông Tin',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              content: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: MediaQuery.of(context).size.width * 0.7, // 70% of screen width
+                  maxWidth: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+                  maxHeight: MediaQuery.of(context).size.height * 0.6, // 60% of screen height
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Bạn có chắc chắn với các thông tin sau?',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 16,
+                        ),
+                      ),
+
+                      SizedBox(height: 20),
+                      _buildInfoRow('Họ và Tên:', _hoVaTenController.text),
+                      SizedBox(height: 10),
+                      _buildInfoRow('Số Điện Thoại:', _sdtController.text),
+                      SizedBox(height: 10),
+                      _buildInfoRow('Năm Sinh:', _namsinhController.text),
+                      SizedBox(height: 20),
+                      SizedBox(height: 15),
+                      Row(
+                        children: [Checkbox(
+                          value: _isConfirmed,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isConfirmed = value ?? false;
+                            });
+                          },
+                        ),
+                          Expanded(
+                            child: Text(
+                              "BẠN LÀ NGƯỜI VỪA XÁC THỰC KHUÔN MẶT",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        children: [Checkbox(
+                          value: _isConfirmed2,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isConfirmed2 = value ?? false;
+                            });
+                          },
+                        ),
+                          Expanded(
+                            child: Text(
+                              "Tuân thủ các quy định, chính sách bảo mật của ứng dụng.",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        children: [Checkbox(
+                          value: _isConfirmed3,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isConfirmed3 = value ?? false;
+                            });
+                          },
+                        ),
+                          Expanded(
+                            child: Text(
+                              "Cam kết cung cấp thông tin chính xác.",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                      Text(
+                        'LƯU Ý: Thông tin này sẽ KHÔNG THỂ THAY ĐỔI sau này!',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              actions: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.grey[200],
+                          ),
+                          child: Text(
+                            'Hủy',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 16,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop(false);
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _isConfirmed ? Colors.blue : Colors.grey,
+                          ),
+                          child: Text(
+                            'Xác Nhận',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                          onPressed: _isConfirmed&&_isConfirmed2&&_isConfirmed3
+                              ? () {
+                            Navigator.of(context).pop(true);
+                          }
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+// Helper method to create consistent info rows
+  Widget _buildInfoRow(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(color: Colors.black87, fontSize: 16),
+        children: [
+          TextSpan(
+              text: label,
+              style: TextStyle(fontWeight: FontWeight.bold)
+          ),
+          TextSpan(text: ' $value'),
+        ],
+      ),
+    );
+  }
+
+// Hàm submit được cập nhật
+  Future<void> _submit() async {
+    var user = Provider.of<UserProvider>(context, listen: false);
+
+    // Kiểm tra xác thực khuôn mặt
+    if (_linkFaceIdController == "") {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Đăng nhập thất bị: $e')));
+          .showSnackBar(SnackBar(content: Text('Vui lòng xác thực khuôn mặt')));
+      return;
     }
 
-}
+    // Hiển thị dialog xác nhận
+    bool? confirmed = await _showConfirmationDialog(context);
+
+    // Nếu người dùng xác nhận
+    if (confirmed == true) {
+      try {
+        _setUserData(
+          user.uid,
+          user.email,
+          _hoVaTenController.text,
+          _linkFaceIdController,
+          int.parse(_namsinhController.text),
+          _sdtController.text,
+          true,
+        );
+
+        // Chuyển tới màn hình login
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Đăng nhập thất bại: $e')));
+      }
+    }
+  }
+
   // Future<void> _submit() async {
   //   var user = Provider.of<UserProvider>(context, listen: false);
   //   print("submit");
@@ -123,7 +337,6 @@ Future<void> _submit() async {
   //     }
   //   }
   // }
-
 
   @override
   Widget build(BuildContext context) {
