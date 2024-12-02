@@ -52,7 +52,7 @@ class Firebasedb {
   Future<void> saveUserReport(UserReports report) async {
     final databaseRef = FirebaseDatabase.instance.ref();
     final reportRef =
-        databaseRef.child('imageReports/${report.uid}/${report.ngayThangNam}');
+        databaseRef.child('imageReports/${report.ngayThangNam}');
 
     await reportRef.set({
       'uid': report.uid,
