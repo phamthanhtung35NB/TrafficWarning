@@ -4,11 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:mobile/screen/login_screen.dart';
 import 'package:mobile/screen/home_screen.dart';
 import 'package:mobile/screen/register_screen.dart';
+import 'package:mobile/screen/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/model/UserProvider.dart'; // Import UserProvider
 import 'package:mobile/screen/user_uthentication.dart';
 import 'config.dart';
-import 'model/UserProvider.dart';
+import 'model/tts_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()), // Bao bọc bằng UserProvider
+        ChangeNotifierProvider(create: (context) => TTSProvider()),
       ],
       child: MaterialApp(
         title: 'Traffic Warning',
@@ -49,6 +51,7 @@ class MyApp extends StatelessWidget {
           '/login_screen': (context) => const LoginScreen(),
           '/register_screen': (context) => const RegisterScreen(),
           '/user_uthentication': (context) => const UserAuthentication(),
+          '/settings': (context) => SettingsScreen(),
         },
         debugShowCheckedModeBanner: false,
         theme: ThemeData(

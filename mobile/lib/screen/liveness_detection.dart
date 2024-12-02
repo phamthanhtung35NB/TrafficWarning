@@ -7,6 +7,7 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
+
 class LivenessDetectionScreen extends StatefulWidget {
   @override
   _LivenessDetectionScreenState createState() =>
@@ -34,7 +35,8 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
   ];
   Timer? _noFaceTimer; // Timer để kiểm soát thông báo không có khuôn mặt.
   Timer? _actionReminderTimer; // Timer để nhắc lại yêu cầu hành động.
-  double _eyeClosedThreshold = 0.3; // Ngưỡng xác định mắt nhắm (điều chỉnh từ 0.0 đến 1.0).
+  double _eyeClosedThreshold =
+      0.3; // Ngưỡng xác định mắt nhắm (điều chỉnh từ 0.0 đến 1.0).
   @override
   void dispose() {
     _actionReminderTimer?.cancel();
@@ -44,6 +46,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     _flutterTts.stop();
     super.dispose();
   }
+
   @override
   void initState() {
     super.initState();
@@ -80,8 +83,8 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     try {
       final rotation = _cameraController?.description.sensorOrientation != null
           ? InputImageRotationMethods.fromRawValue(
-          _cameraController!.description.sensorOrientation) ??
-          InputImageRotation.Rotation_0deg
+                  _cameraController!.description.sensorOrientation) ??
+              InputImageRotation.Rotation_0deg
           : InputImageRotation.Rotation_0deg;
 
       final InputImage inputImage = _convertCameraImage(image, rotation);
@@ -108,7 +111,8 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
         final face = faces[0];
 
         if (_faceCount == 0) {
-          _speak("Giữ khuôn mặt ở vị trí này và làm theo chỉ dẫn. \n \n \n               bắt đầu xác minh"); // Chỉ phát khi phát hiện lần đầu.
+          _speak(
+              "Giữ khuôn mặt ở vị trí này và làm theo chỉ dẫn. \n \n \n               bắt đầu xác minh"); // Chỉ phát khi phát hiện lần đầu.
         }
 
         setState(() {
@@ -116,7 +120,6 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
           _checkLiveness(face);
         });
       }
-
     } catch (e) {
       print('Lỗi khi phát hiện khuôn mặt: $e');
     } finally {
@@ -143,8 +146,9 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
       inputImageData: InputImageData(
         size: imageSize,
         imageRotation: rotation,
-        inputImageFormat: InputImageFormatMethods.fromRawValue(image.format.raw) ??
-            InputImageFormat.NV21,
+        inputImageFormat:
+            InputImageFormatMethods.fromRawValue(image.format.raw) ??
+                InputImageFormat.NV21,
         planeData: planeData,
       ),
     );
@@ -154,7 +158,8 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     double leftEyeOpenProbability;
     double rightEyeOpenProbability;
 
-    if (_cameraController?.description.lensDirection == CameraLensDirection.front) {
+    if (_cameraController?.description.lensDirection ==
+        CameraLensDirection.front) {
       // Đảo ngược mắt trái và mắt phải nếu dùng camera trước
       leftEyeOpenProbability = face.rightEyeOpenProbability ?? 0.0;
       rightEyeOpenProbability = face.leftEyeOpenProbability ?? 0.0;
@@ -171,9 +176,11 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     final currentAction = _actions[_currentActionIndex];
 
     // Kiểm tra từng hành động và chuyển sang bước tiếp theo nếu đúng.
-    if (_currentActionIndex == 0 && leftEyeOpenProbability < _eyeClosedThreshold) {
+    if (_currentActionIndex == 0 &&
+        leftEyeOpenProbability < _eyeClosedThreshold) {
       _nextAction();
-    } else if (_currentActionIndex == 1 && rightEyeOpenProbability < _eyeClosedThreshold) {
+    } else if (_currentActionIndex == 1 &&
+        rightEyeOpenProbability < _eyeClosedThreshold) {
       _nextAction();
     } else if (_currentActionIndex == 2 &&
         leftEyeOpenProbability < _eyeClosedThreshold &&
@@ -227,7 +234,8 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
       // Chụp ảnh từ camera
       final image = await _cameraController?.takePicture();
       if (image != null) {
-        final imagePath = '${directoryPath}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final imagePath =
+            '${directoryPath}/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
         // Lưu ảnh vào bộ nhớ
         final File file = File(imagePath);
@@ -243,7 +251,9 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
 
   Future<void> _uploadImageToStorage(File file) async {
     try {
-      final storageRef = FirebaseStorage.instance.ref().child('authentication/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('authentication/${DateTime.now().millisecondsSinceEpoch}.jpg');
       final uploadTask = storageRef.putFile(file);
 
       final snapshot = await uploadTask;
@@ -253,12 +263,10 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
 
       // Quay lại màn hình trước và trả về link ảnh
       Navigator.pop(context, downloadUrl);
-
     } catch (e) {
       print('Lỗi khi tải ảnh lên Firebase Storage: $e');
     }
   }
-
 
   void _startActionReminder(String action) {
     if (_actionReminderTimer == null || !_actionReminderTimer!.isActive) {
@@ -270,7 +278,6 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     }
   }
 
-
   void _resetActions() {
     _actionReminderTimer?.cancel(); // Hủy Timer khi khởi động lại quy trình.
     setState(() {
@@ -279,7 +286,6 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
       _hasSpokenSuccess = false; // Đặt lại cờ khi bắt đầu lại.
     });
   }
-
 
   bool _isSpeaking = false; // Cờ kiểm tra trạng thái TTS.
 
@@ -294,7 +300,6 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -303,46 +308,46 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
       ),
       body: _cameraController != null && _cameraController!.value.isInitialized
           ? Stack(
-        children: [
-          Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.rotationY(math.pi),
-            child: CameraPreview(_cameraController!),
-          ),
-          Positioned(
-            top: 20,
-            left: 20,
-            child: Text(
-              'Hành động: ${_actions[_currentActionIndex]}',
-              style: TextStyle(fontSize: 18, color: Colors.blue),
-            ),
-          ),
-          Positioned(
-            top: 50,
-            left: 20,
-            child: Text(
-              'Số khuôn mặt phát hiện được: $_faceCount',
-              style: TextStyle(fontSize: 18, color: Colors.black),
-            ),
-          ),
-          Positioned(
-            top: 80,
-            left: 20,
-            child: Text(
-              'Mắt trái mở: ${_leftEyeOpenProbability.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 18, color: Colors.black),
-            ),
-          ),
-          Positioned(
-            top: 110,
-            left: 20,
-            child: Text(
-              'Mắt phải mở: ${_rightEyeOpenProbability.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 18, color: Colors.black),
-            ),
-          ),
-        ],
-      )
+              children: [
+                Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.pi),
+                  child: CameraPreview(_cameraController!),
+                ),
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: Text(
+                    'Hành động: ${_actions[_currentActionIndex]}',
+                    style: TextStyle(fontSize: 18, color: Colors.blue),
+                  ),
+                ),
+                Positioned(
+                  top: 50,
+                  left: 20,
+                  child: Text(
+                    'Số khuôn mặt phát hiện được: $_faceCount',
+                    style: TextStyle(fontSize: 18, color: Colors.black),
+                  ),
+                ),
+                Positioned(
+                  top: 80,
+                  left: 20,
+                  child: Text(
+                    'Mắt trái mở: ${_leftEyeOpenProbability.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: 18, color: Colors.black),
+                  ),
+                ),
+                Positioned(
+                  top: 110,
+                  left: 20,
+                  child: Text(
+                    'Mắt phải mở: ${_rightEyeOpenProbability.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: 18, color: Colors.black),
+                  ),
+                ),
+              ],
+            )
           : Center(child: CircularProgressIndicator()),
     );
   }

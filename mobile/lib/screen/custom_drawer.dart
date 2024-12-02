@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../model/tts_provider.dart';
+import 'package:mobile/screen/settings.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -44,7 +47,10 @@ class CustomDrawer extends StatelessWidget {
               title: const Text('Settings'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
-                // Navigate to Settings screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
+                );
               },
             ),
             ListTile(

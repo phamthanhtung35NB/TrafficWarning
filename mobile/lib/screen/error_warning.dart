@@ -39,7 +39,7 @@ class _ErrorWarningState extends State<ErrorWarning> {
                 print('Chụp ảnh');
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LivenessDetectionScreen()),
+                  MaterialPageRoute(builder: (context) => CameraScreen()),
                 );
               },
               child: const Row(

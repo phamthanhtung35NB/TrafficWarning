@@ -102,7 +102,7 @@ class _UserAuthenticationState extends State<UserAuthentication> {
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         'Bạn có chắc chắn với các thông tin sau?',
@@ -111,7 +111,22 @@ class _UserAuthenticationState extends State<UserAuthentication> {
                           fontSize: 16,
                         ),
                       ),
-
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 3,
+                              blurRadius: 10,
+                            )
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundImage: NetworkImage(_linkFaceIdController),
+                        ),
+                      ),
                       SizedBox(height: 20),
                       _buildInfoRow('Họ và Tên:', _hoVaTenController.text),
                       SizedBox(height: 10),
