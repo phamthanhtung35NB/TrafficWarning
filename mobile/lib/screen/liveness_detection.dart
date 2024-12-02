@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
 class LivenessDetectionScreen extends StatefulWidget {
   @override
   _LivenessDetectionScreenState createState() =>
@@ -187,7 +189,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
     }
   }
 
-  void _nextAction({bool success = false}) {
+  void _nextAction({bool success = false}) async {
     _actionReminderTimer?.cancel(); // Hủy nhắc nhở khi chuyển bước.
 
     if (success) {
@@ -196,13 +198,64 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionScreen> {
           _isLivenessDetected = true;
           _hasSpokenSuccess = true; // Đánh dấu đã nói thành công.
         });
+        print("-2222222222222");
         _speak('Xác minh thành công');
+
+        // Chụp ảnh khi người dùng mở mắt
+        await _captureAndUploadImage();
       }
     } else {
       setState(() {
         _currentActionIndex = (_currentActionIndex + 1) % _actions.length;
       });
       _speak(_actions[_currentActionIndex]);
+    }
+  }
+
+  Future<void> _captureAndUploadImage() async {
+    try {
+      // Lấy đường dẫn thư mục Authentication
+      final directory = await getApplicationDocumentsDirectory();
+      final directoryPath = '${directory.path}/Authentication';
+
+      // Tạo thư mục nếu chưa tồn tại
+      final directoryExist = Directory(directoryPath).existsSync();
+      if (!directoryExist) {
+        Directory(directoryPath).createSync();
+      }
+
+      // Chụp ảnh từ camera
+      final image = await _cameraController?.takePicture();
+      if (image != null) {
+        final imagePath = '${directoryPath}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+        // Lưu ảnh vào bộ nhớ
+        final File file = File(imagePath);
+        await file.writeAsBytes(await image.readAsBytes());
+
+        // Upload ảnh lên Firebase Storage
+        await _uploadImageToStorage(file);
+      }
+    } catch (e) {
+      print('Lỗi khi chụp và tải ảnh lên: $e');
+    }
+  }
+
+  Future<void> _uploadImageToStorage(File file) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child('authentication/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final uploadTask = storageRef.putFile(file);
+
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      print('Ảnh đã được tải lên thành công. URL: $downloadUrl');
+
+      // Quay lại màn hình trước và trả về link ảnh
+      Navigator.pop(context, downloadUrl);
+
+    } catch (e) {
+      print('Lỗi khi tải ảnh lên Firebase Storage: $e');
     }
   }
 

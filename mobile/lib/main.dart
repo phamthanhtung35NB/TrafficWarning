@@ -4,7 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:mobile/screen/login_screen.dart';
 import 'package:mobile/screen/home_screen.dart';
 import 'package:mobile/screen/register_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile/model/UserProvider.dart'; // Import UserProvider
+import 'package:mobile/screen/user_uthentication.dart';
 import 'config.dart';
+import 'model/UserProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,20 +36,55 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Traffic Warning',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const LoginScreen(),
-        '/home_screen': (context) => const HomeScreen(),
-        '/login_screen': (context) => const LoginScreen(),
-        '/register_screen': (context) => const RegisterScreen(),
-      },
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider()), // Bao bọc bằng UserProvider
+      ],
+      child: MaterialApp(
+        title: 'Traffic Warning',
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const LoginScreen(),
+          '/home_screen': (context) => const HomeScreen(),
+          '/login_screen': (context) => const LoginScreen(),
+          '/register_screen': (context) => const RegisterScreen(),
+          '/user_uthentication': (context) => const UserAuthentication(),
+        },
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
       ),
     );
   }
 }
+
+
+
+// import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
+// import 'package:mobile/provider/user_provider.dart';
+// import 'package:mobile/screen/home_screen.dart';
+//
+// void main() {
+//   runApp(MyApp());
+// }
+//
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MultiProvider(
+//       providers: [
+//         ChangeNotifierProvider(create: (context) => UserProvider()),
+//       ],
+//       child: MaterialApp(
+//         title: 'Flutter Demo',
+//         theme: ThemeData(
+//           primarySwatch: Colors.blue,
+//         ),
+//         home: const HomeScreen(), // Hoặc màn hình đăng nhập của bạn
+//       ),
+//     );
+//   }
+// }

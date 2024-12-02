@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile/controller/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'home_screen.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -17,8 +19,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final LoginController _loginController = LoginController();
   String? _verificationId;
 
-  Future<void> _login() async {
-    String? result = await _loginController.login(
+  Future<void> _login(BuildContext context) async {
+    String? result = await _loginController.login(context,
       _usernameController.text,
       _passwordController.text,
     );
@@ -38,12 +40,19 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _loginWithGoogle() async {
-    String? result = await _loginController.loginWithGoogle();
+  Future<String> _loginWithGoogle(BuildContext context) async {
+    String? result = await _loginController.loginWithGoogle(context);
 
     if (result != null) {
       print("UID: $result");
       if (result.length == 28) {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => HomeScreen(uid: result), // Truyền UID của người dùng
+        //   ),
+        // );
+
         Navigator.pushNamed(context, '/home_screen', arguments: result);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login successful. UID: $result')),
@@ -54,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
+    return result ?? '';
   }
 
   Future<void> _resetPassword() async {
@@ -151,14 +161,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
-                onPressed: _login,
+                onPressed: () => _login(context),
                 child: const Text('Đăng nhập'),
               ),
               const SizedBox(height: 16.0),
               // hiện text hoặc đăng nhập bằng Google, gạch chân dưới chữ
               const Text('Hoặc đăng nhập bằng', style: TextStyle(fontSize: 14, color: Colors.grey)),
               ElevatedButton.icon(
-                onPressed: _loginWithGoogle,
+                onPressed: () =>_loginWithGoogle(context),
                 icon: SvgPicture.network(
                   'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
                   height: 24.0,

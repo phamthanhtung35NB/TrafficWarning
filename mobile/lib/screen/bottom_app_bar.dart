@@ -14,10 +14,17 @@ class BottomAppBarWidget extends StatelessWidget{
         children: <Widget>[
           IconButton(onPressed: (){
             // chuyen den man hinh home
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => const HomeScreen()),
+            // );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => HomeScreen(uid: HomeScreen.uid), // Truyền UID ở đây
+            //   ),
+            // );
+
           }, icon: const Icon(Icons.home)),
           IconButton(onPressed: (){
           // chuyen den man hinh report
