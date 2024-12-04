@@ -228,7 +228,7 @@ class _ErrorWarningState extends State<ErrorWarning> {
                     ),
                     child: _firstImagePath == null
                         ? const Icon(Icons.camera_alt,
-                            size: 40, color: Colors.grey)
+                            size: 40, color: Colors.black)
                         : null,
                   ),
                 ),
@@ -251,7 +251,7 @@ class _ErrorWarningState extends State<ErrorWarning> {
                     ),
                     child: _secondImagePath == null
                         ? const Icon(Icons.camera_alt,
-                            size: 40, color: Colors.grey)
+                            size: 40, color: Colors.black)
                         : null,
                   ),
                 ),

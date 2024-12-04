@@ -30,6 +30,28 @@ class Firebasedb {
     });
   }
 
+  // Get all devices once
+  Future<Map<String, dynamic>> fetchDevicesReports() async {
+    DatabaseEvent event = await _database.child('imageReports').once();
+    if (event.snapshot.exists) {
+      return Map<String, dynamic>.from(event.snapshot.value as Map);
+    } else {
+      return {};
+    }
+  }
+
+  // Listen to device changes in real-time
+  void listenToDeviceChangesReports(void Function(Map<String, dynamic>) onData) {
+    _database.child('imageReports').onValue.listen((event) {
+      if (event.snapshot.exists) {
+        onData(Map<String, dynamic>.from(event.snapshot.value as Map));
+      } else {
+        onData({});
+      }
+    });
+  }
+
+
   Future<String> uploadImage(
       String filePath, String ngayThangNam, String uid, String fileName) async {
     try {
