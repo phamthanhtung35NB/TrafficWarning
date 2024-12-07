@@ -29,9 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
       print("UID: $result");
       if (result.length == 28) {
         Navigator.pushNamed(context, '/home_screen', arguments: result);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login successful. UID: $result')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('Login successful. UID: $result')),
+        // );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result)),

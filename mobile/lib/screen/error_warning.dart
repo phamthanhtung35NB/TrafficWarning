@@ -150,12 +150,6 @@ class _ErrorWarningState extends State<ErrorWarning> {
   Widget build(BuildContext context) {
     var user = Provider.of<UserProvider>(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Align(
-          alignment: Alignment.center,
-          child: Text('Báo cáo sự cố', style: TextStyle(color: Colors.black)),
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
