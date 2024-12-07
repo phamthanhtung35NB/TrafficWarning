@@ -6,6 +6,7 @@ import 'package:mobile/screen/bottom_app_bar.dart';
 import 'package:mobile/screen/error_warning.dart';
 import 'package:mobile/screen/map_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:mobile/screen/list_markers_screen.dart';
 // import 'package:mobile/screen/user_uthentication.dart';
 import 'package:mobile/model/UserProvider.dart';
 
@@ -50,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Widget _getSelectedScreen() {
       switch (_selectedIndex) {
         case 0:
-          return MapScreen();
+          return ListMarkersScreen();
         case 1:
           return MapScreen();
         case 2:
@@ -120,7 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
               return;
             }else if (index == 2 && isAuthenticated) {
               _selectedIndex = index;
-              return;
+            } else {
+              _selectedIndex = index;
             }
           });
         },

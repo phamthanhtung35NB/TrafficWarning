@@ -23,6 +23,7 @@ class _PulsingMarkerState extends State<PulsingMarker> with SingleTickerProvider
     super.dispose();
   }
 
+  // vẽ vòng tròn pulse ngoài, vòng tròn chính và chấm ở giữa (use AnimatedBuilder)
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(

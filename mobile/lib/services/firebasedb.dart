@@ -9,7 +9,17 @@ import '../model/user_reports.dart';
 class Firebasedb {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
 
-  // Get all devices once
+  // // Get all devices once
+  // Future<Map<String, dynamic>> fetchDevices() async {
+  //   DatabaseEvent event = await _database.child('devices').once();
+  //   if (event.snapshot.exists) {
+  //     return Map<String, dynamic>.from(event.snapshot.value as Map);
+  //   } else {
+  //     return {};
+  //   }
+  // }
+
+// Get all devices once
   Future<Map<String, dynamic>> fetchDevices() async {
     DatabaseEvent event = await _database.child('devices').once();
     if (event.snapshot.exists) {
@@ -18,7 +28,22 @@ class Firebasedb {
       return {};
     }
   }
-
+  Future<Map<String, dynamic>> fetchDevicesReports() async {
+    DatabaseEvent event = await _database.child('imageReports').once();
+    if (event.snapshot.exists) {
+      return Map<String, dynamic>.from(event.snapshot.value as Map);
+    } else {
+      return {};
+    }
+  }
+  Future<Map<String, dynamic>> fetchUVReports() async {
+    DatabaseEvent event = await _database.child('uv').once();
+    if (event.snapshot.exists) {
+      return Map<String, dynamic>.from(event.snapshot.value as Map);
+    } else {
+      return {};
+    }
+  }
   // Listen to device changes in real-time
   void listenToDeviceChanges(void Function(Map<String, dynamic>) onData) {
     _database.child('devices').onValue.listen((event) {
@@ -30,18 +55,18 @@ class Firebasedb {
     });
   }
 
-  // Get all devices once
-  Future<Map<String, dynamic>> fetchDevicesReports() async {
-    DatabaseEvent event = await _database.child('imageReports').once();
-    if (event.snapshot.exists) {
-      return Map<String, dynamic>.from(event.snapshot.value as Map);
-    } else {
-      return {};
-    }
-  }
+  // // Get all devices once
+  // Future<Map<String, dynamic>> fetchDevicesReports() async {
+  //   DatabaseEvent event = await _database.child('imageReports').once();
+  //   if (event.snapshot.exists) {
+  //     return Map<String, dynamic>.from(event.snapshot.value as Map);
+  //   } else {
+  //     return {};
+  //   }
+  // }
 
-  // Listen to device changes in real-time
-  void listenToDeviceChangesReports(void Function(Map<String, dynamic>) onData) {
+  // Lắng nghe thay đổi của imageReports
+  void listenToImageReportsChanges(void Function(Map<String, dynamic>) onData) {
     _database.child('imageReports').onValue.listen((event) {
       if (event.snapshot.exists) {
         onData(Map<String, dynamic>.from(event.snapshot.value as Map));
@@ -50,6 +75,28 @@ class Firebasedb {
       }
     });
   }
+
+  // Lắng nghe thay đổi của uv
+  void listenToUVChanges(void Function(Map<String, dynamic>) onData) {
+    _database.child('uv').onValue.listen((event) {
+      if (event.snapshot.exists) {
+        onData(Map<String, dynamic>.from(event.snapshot.value as Map));
+      } else {
+        onData({});
+      }
+    });
+  }
+
+  // // Listen to device changes in real-time
+  // void listenToDeviceChangesReports(void Function(Map<String, dynamic>) onData) {
+  //   _database.child('imageReports').onValue.listen((event) {
+  //     if (event.snapshot.exists) {
+  //       onData(Map<String, dynamic>.from(event.snapshot.value as Map));
+  //     } else {
+  //       onData({});
+  //     }
+  //   });
+  // }
 
 
   Future<String> uploadImage(
