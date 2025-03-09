@@ -18,8 +18,8 @@ def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.0
 
 android {
     namespace = "com.example.mobile"
-    compileSdk = 34  // Set this explicitly if not coming from Flutter config
-    ndkVersion = "21.3.6528147"  // Define explicitly if needed
+    compileSdk = 34  // Đặt điều này một cách rõ ràng nếu không đến từ cấu hình Flutter
+    ndkVersion = "21.3.6528147"  // Xác định rõ ràng nếu cần
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -28,8 +28,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.mobile"
-        minSdk = 28  // Ensure this is the minimum supported by both Flutter and Firebase
-        targetSdk = 34  // Set explicitly if flutter.targetSdkVersion isn't working
+        minSdk = 28  // Đảm bảo đây là mức tối thiểu được cả Flutter và Firebase hỗ trợ
+        targetSdk = flutter.targetSdkVersion  // Đặt rõ ràng nếu flutter.targetSdkVersion không hoạt động
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
