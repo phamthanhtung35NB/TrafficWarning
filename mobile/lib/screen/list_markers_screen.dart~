@@ -45,7 +45,7 @@ class _ListMarkersScreenState extends State<ListMarkersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Danh sách các đối tượng'),
+        title: Text('Danh sách các đối tượng'),
         actions: [
           IconButton(
             icon: Icon(_sortByDistance ? Icons.sort_by_alpha : Icons.sort),

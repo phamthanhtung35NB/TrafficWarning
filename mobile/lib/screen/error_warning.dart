@@ -360,7 +360,7 @@ import 'dart:io';
                           const SizedBox(height: 8),
                           Text(
                             isFirst ? 'Hình ảnh 1' : 'Hình ảnh 2',
-                            style: TextStyle(fontWeight: FontWeight.w500),
+                            style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
                         ],
                       );
