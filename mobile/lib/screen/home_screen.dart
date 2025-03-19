@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:mobile/screen/list_markers_screen.dart';
 // import 'package:mobile/screen/user_uthentication.dart';
 import 'package:mobile/model/UserProvider.dart';
-
+import 'package:mobile/model/markerss.dart';
+import 'package:firebase_database/firebase_database.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 1;
-
   @override
   void initState() {
     super.initState();
@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Cảnh báo'),
+          title: const Text('Lưu ý'),
           content: const Text('Bạn cần xác minh thông tin để thực hiện chức năng này.'),
           actions: <Widget>[
             TextButton(
@@ -60,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return MapScreen();
       }
     }
+
 
     return Scaffold(
       appBar: const AppBarScreen(),

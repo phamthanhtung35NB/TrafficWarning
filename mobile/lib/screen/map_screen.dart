@@ -12,14 +12,10 @@ class MapScreen extends StatefulWidget {
   _MapScreenState createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
+class _MapScreenState extends State<MapScreen> {
   final CustomMapController _mapController = CustomMapController();
   Timer? _timer;
   StreamSubscription<Position>? _positionStreamSubscription;
-  late final AnimationController _fabAnimationController;
-  bool _isMapInteracted = false;
-  bool _showSearchResults = false;
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -27,16 +23,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     _initializeMap();
     _startUpdatingLocation();
     _mapController.listenToDeviceChanges();
-    _fabAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
 
     _mapController.mapController.mapEventStream.listen((event) {
       if (event is MapEventMove) {
-        setState(() {
-          _isMapInteracted = true;
-        });
+        setState(() {});
       }
     });
   }
@@ -57,8 +47,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   void dispose() {
     _timer?.cancel();
     _positionStreamSubscription?.cancel();
-    _fabAnimationController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -76,22 +64,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _viewList() {
-    // Animation for transition to list view could be added here
-  }
+  void _viewList() {}
 
   void _moveToCurrentLocation() {
-    _mapController.mapController.move(_mapController.currentPosition, 15.0);
-    _fabAnimationController.forward(from: 0.0);
-    setState(() {
-      _isMapInteracted = false;
-    });
-  }
-
-  void _toggleSearchResults() {
-    setState(() {
-      _showSearchResults = !_showSearchResults;
-    });
+    _mapController.mapController.move(_mapController.currentPosition, 13.0);
   }
 
   @override
@@ -100,26 +76,18 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       markers: _mapController.markers,
       mapController: _mapController,
     );
-
     return Stack(
       children: [
-        // Map Layer
         FlutterMap(
           mapController: _mapController.mapController,
           options: MapOptions(
             center: _mapController.currentPosition,
-            zoom: 15.0,
-            minZoom: 3.0,
-            maxZoom: 18.0,
-            interactiveFlags: InteractiveFlag.all,
-            enableScrollWheel: true,
+            zoom: 13.0,
           ),
           children: [
             TileLayer(
               urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
               subdomains: const ['a', 'b', 'c'],
-              userAgentPackageName: 'com.example.mobile',
-              tileProvider: NetworkTileProvider(),
             ),
             CircleLayer(
               circles: circleLayerBuilder.buildCircles(),
@@ -137,166 +105,45 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-
-        // Search Bar
-        // Positioned(
-        //   top: 16,
-        //   left: 16,
-        //   right: 16,
-        //   child: Card(
-        //     elevation: 4,
-        //     shape: RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(12),
-        //     ),
-        //     child: Column(
-        //       mainAxisSize: MainAxisSize.min,
-        //       children: [
-        //         TextField(
-        //           controller: _searchController,
-        //           decoration: InputDecoration(
-        //             hintText: 'Tìm kiếm địa điểm...',
-        //             prefixIcon: const Icon(Icons.search, color: Colors.blue),
-        //             suffixIcon: IconButton(
-        //               icon: Icon(
-        //                 _showSearchResults ? Icons.close : Icons.filter_list,
-        //                 color: Colors.grey,
-        //               ),
-        //               onPressed: _toggleSearchResults,
-        //             ),
-        //             border: InputBorder.none,
-        //             contentPadding: const EdgeInsets.symmetric(vertical: 15),
-        //           ),
-        //         ),
-        //         // Search results (can be expanded with actual search functionality)
-        //         if (_showSearchResults)
-        //           Container(
-        //             constraints: BoxConstraints(
-        //               maxHeight: MediaQuery.of(context).size.height * 0.3,
-        //             ),
-        //             decoration: BoxDecoration(
-        //               border: Border(
-        //                 top: BorderSide(color: Colors.grey.shade300),
-        //               ),
-        //             ),
-        //             child: ListView(
-        //               shrinkWrap: true,
-        //               padding: EdgeInsets.zero,
-        //               children: [
-        //                 ListTile(
-        //                   leading: const Icon(Icons.history, color: Colors.grey),
-        //                   title: const Text('Tìm kiếm gần đây...'),
-        //                   onTap: () {},
-        //                 ),
-        //               ],
-        //             ),
-        //           ),
-        //       ],
-        //     ),
-        //   ),
-        // ),
-
-        // Information panel for location (can be shown when a marker is selected)
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            child: Container(
-              height: 0, // Set to a value when displaying info
-              color: Colors.white,
-            ),
+          bottom: 20,
+          right: 20,
+          child: FloatingActionButton(
+            onPressed: _moveToCurrentLocation,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.my_location, color: Colors.blue),
           ),
         ),
-
-        // Bottom-right Controls
         Positioned(
           bottom: 100,
-          right: 16,
+          right: 20,
           child: Column(
             children: [
-              _buildFloatingButton(
-                Icons.zoom_in,
-                _zoomIn,
-                'zoom_in_button',
-                tooltip: 'Phóng to',
+              FloatingActionButton(
+                onPressed: _zoomIn,
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.zoom_in),
               ),
-              const SizedBox(height: 8),
-              _buildFloatingButton(
-                Icons.zoom_out,
-                _zoomOut,
-                'zoom_out_button',
-                tooltip: 'Thu nhỏ',
+              const SizedBox(height: 10),
+              FloatingActionButton(
+                onPressed: _zoomOut,
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.zoom_out),
               ),
+              const SizedBox(height: 10),
             ],
           ),
         ),
-
-        // Current location button
         Positioned(
-          bottom: 30,
-          right: 16,
-          child: RotationTransition(
-            turns: Tween(begin: 0.0, end: 1.0).animate(_fabAnimationController),
-            child: _buildFloatingButton(
-              _isMapInteracted ? Icons.my_location : Icons.gps_fixed,
-              _moveToCurrentLocation,
-              'location_button',
-              tooltip: 'Vị trí hiện tại',
-              color: Colors.blue,
-              iconColor: Colors.white,
-            ),
+          bottom: 20,
+          left: 20,
+          child: FloatingActionButton(
+            onPressed: _viewList,
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.list),
           ),
         ),
-
-        // View list button
-        Positioned(
-          bottom: 30,
-          left: 16,
-          child: _buildFloatingButton(
-            Icons.list,
-            _viewList,
-            'list_button',
-            tooltip: 'Danh sách',
-          ),
-        ),
-
-        // Loading indicator
-        if (_mapController.currentPosition.latitude == 0)
-          Container(
-            color: Colors.white.withOpacity(0.7),
-            child: const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Đang tải bản đồ...'),
-                ],
-              ),
-            ),
-          ),
       ],
-    );
-  }
-
-  Widget _buildFloatingButton(
-    IconData icon,
-    VoidCallback onPressed,
-    String heroTag, {
-    String? tooltip,
-    Color color = Colors.white,
-    Color iconColor = Colors.blue,
-  }) {
-    return FloatingActionButton(
-      heroTag: heroTag,
-      onPressed: onPressed,
-      backgroundColor: color,
-      foregroundColor: iconColor,
-      elevation: 4,
-      tooltip: tooltip,
-      mini: heroTag != 'location_button',
-      child: Icon(icon),
     );
   }
 }

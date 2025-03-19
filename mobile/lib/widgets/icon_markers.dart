@@ -121,7 +121,7 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
         _calculateDistance(widget.currentPosition, markerPosition);
 
     var flutterTtsCustom = FlutterTtsCustom();
-    double iconSize = 40.0;
+    double iconSize = 30.0;
 
     Widget locationIcon =
         Icon(Icons.location_on, color: Colors.blue, size: iconSize);
@@ -154,7 +154,13 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
     }
 
     Widget floodIcon = const SizedBox.shrink();
-    if (widget.marker.level == 1) {
+      if (widget.marker.waterDepth<=30 && widget.marker.waterDepth>0) {
+        //thêm padding để icon không bị cắt
+        floodIcon = const Padding(
+          padding: EdgeInsets.only(left: 5.0),
+          child: Icon(Icons.waves, color: Colors.yellowAccent, size: 30.0),
+        );
+      }else if (widget.marker.level == 1) {
       //thêm padding để icon không bị cắt
       floodIcon = const Padding(
         padding: EdgeInsets.only(left: 5.0),
@@ -170,11 +176,12 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
         padding: EdgeInsets.only(left: 5.0),
         child: Icon(Icons.waves, color: Colors.red, size: 30.0),
       );
+
     }
     if (distance <= 1000 && !isSpeaking) {
       // Bắt đầu phát âm thanh 60s một lần nếu chưa phát
       flutterTtsCustom.startSpeaking(
-          'Cảnh báo đã tiến vào khu vực có mực nước bị ngập cấp: ${widget.marker.level}');
+          'Cảnh báo đã tiến vào khu vực có mực nước bị ngập cấp: ${widget.marker.level},${widget.marker.other}');
       setState(() {
         isSpeaking = true; // Cập nhật trạng thái
       });
@@ -232,7 +239,10 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
                   color: Colors.black,
                   backgroundColor: Colors.white)),
           // backgroundColor: Colors.grey[500],
-          content: Column(
+        content: Container(
+        width: 400, // Chiều rộng tùy chỉnh cho hộp thoại
+        height: 250, // Chiều cao tùy chỉnh cho hộp thoại
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -241,7 +251,7 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
                   children: [
                     const Icon(Icons.water, color: Colors.blue, size: 20),
                     const SizedBox(width: 8),
-                    Text('Mực nước thấp, cảnh báo cấp: ${widget.marker.level}',
+                    Text('Mực nước thấp,\ncảnh báo cấp: ${widget.marker.level}',
                         style: const TextStyle(color: Colors.blue)),
                   ],
                 ),
@@ -251,7 +261,7 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
                     const Icon(Icons.water, color: Colors.orange, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                        'Mực nước trung bình, cảnh báo cấp: ${widget.marker.level}',
+                        'Mực nước trung bình,\ncảnh báo cấp: ${widget.marker.level} ',
                         style: const TextStyle(color: Colors.orange)),
                   ],
                 ),
@@ -260,7 +270,7 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
                   children: [
                     const Icon(Icons.water, color: Colors.red, size: 20),
                     const SizedBox(width: 8),
-                    Text('Mực nước cao, cảnh báo cấp: ${widget.marker.level}',
+                    Text('Mực nước cao,\n cảnh báo cấp: ${widget.marker.level}',
                         style: const TextStyle(color: Colors.red)),
                   ],
                 ),
@@ -275,7 +285,16 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
               // const SizedBox(height: 8),
 
               const SizedBox(height: 8),
-              if (widget.marker.level == 1)
+              if (widget.marker.waterDepth<=30 && widget.marker.waterDepth>0)
+                Row(
+                  children: [
+                    const Icon(Icons.privacy_tip, color: Colors.blue, size: 20),
+                    const SizedBox(width: 8),
+                    Text('Độ cao nước: ${widget.marker.waterDepth} cm',
+                        style: const TextStyle(color: Colors.blue)),
+                  ],
+                )
+             else if (widget.marker.level == 1)
                 Row(
                   children: [
                     const Icon(Icons.privacy_tip, color: Colors.blue, size: 20),
@@ -303,32 +322,32 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
                   ],
                 ),
 
-              const SizedBox(height: 8),
+              // const SizedBox(height: 8),
               // Mưa
-              if (widget.marker.mua)
-                const Row(
-                  children: [
-                    Icon(Icons.cloud, color: Colors.grey, size: 20),
-                    SizedBox(width: 8),
-                    Text('Đang có mưa', style: TextStyle(color: Colors.grey)),
-                  ],
-                )
-              else
-                const Row(
-                  children: [
-                    Icon(Icons.cloud_off, color: Colors.grey, size: 20),
-                    SizedBox(width: 8),
-                    Text('Không mưa', style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.wb_sunny, color: Colors.orangeAccent, size: 20),
-                  const SizedBox(width: 8),
-                  Text('Chỉ số UV: ${widget.marker.uv}'),
-                ],
-              ),
+              // if (widget.marker.mua)
+              //   const Row(
+              //     children: [
+              //       Icon(Icons.cloud, color: Colors.grey, size: 20),
+              //       SizedBox(width: 8),
+              //       Text('Đang có mưa', style: TextStyle(color: Colors.grey)),
+              //     ],
+              //   )
+              // else
+              //   const Row(
+              //     children: [
+              //       Icon(Icons.cloud_off, color: Colors.grey, size: 20),
+              //       SizedBox(width: 8),
+              //       Text('Không mưa', style: TextStyle(color: Colors.grey)),
+              //     ],
+              //   ),
+              // const SizedBox(height: 8),
+              // Row(
+              //   children: [
+              //     const Icon(Icons.wb_sunny, color: Colors.orangeAccent, size: 20),
+              //     const SizedBox(width: 8),
+              //     Text('Chỉ số UV: ${widget.marker.uv}'),
+              //   ],
+              // ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -339,6 +358,7 @@ class _IconMarkersCustomDrawerState extends State<IconMarkersCustomDrawer> {
                 ],
               ),
             ],
+          ),
           ),
           actions: [
             TextButton(

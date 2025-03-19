@@ -16,7 +16,7 @@ import '../model/markers_uv.dart';
 class CustomMapController {
   List<Marker> markers = [];
   Marker? userLocationMarker;
-  LatLng currentPosition = LatLng(21.038859, 105.785613);
+  LatLng currentPosition = LatLng(20.2542, 105.9742);
 
   final Firebasedb firebasedb = Firebasedb();
   final MapController mapController = MapController();

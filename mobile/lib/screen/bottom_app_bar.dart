@@ -16,7 +16,7 @@ class BottomAppBarWidget extends StatelessWidget {
     return ConvexAppBar(
       style: TabStyle.react,
       items: const [
-        TabItem(icon: Icons.list, title: 'Danh sách các trạm'),
+        TabItem(icon: Icons.list, title: 'Danh sách'),
         TabItem(icon: Icons.map, title: 'Map'),
         TabItem(icon: Icons.warning, title: 'Báo cáo sự cố'),
       ],

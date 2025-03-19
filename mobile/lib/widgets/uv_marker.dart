@@ -15,12 +15,13 @@ class UVMarker extends StatelessWidget {
   }
 
   Widget _buildUVReportIcon() {
+    if(uvReport.uv<3 && uvReport.uv>=0){
     return Container(
       width: 40,
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.purple,
+        color: Colors.green,
       ),
       child: Icon(
         Icons.wb_sunny,
@@ -28,6 +29,51 @@ class UVMarker extends StatelessWidget {
         size: 30.0,
       ),
     );
+    } else if(3<=uvReport.uv&& uvReport.uv<8){
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.amberAccent,
+        ),
+        child: Icon(
+          Icons.wb_sunny,
+          color: Colors.white,
+          size: 30.0,
+        ),
+      );
+    } else if(8<=uvReport.uv && uvReport.uv <11)
+      { return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.red,
+        ),
+        child: Icon(
+          Icons.wb_sunny,
+          color: Colors.white,
+          size: 30.0,
+        ),
+
+      );
+      } else if(uvReport.uv >=11) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.purple,
+        ),
+        child: Icon(
+          Icons.wb_sunny,
+          color: Colors.white,
+          size: 30.0,
+        ),
+      );
+    }
+    return SizedBox.shrink();
   }
 
   void _showUVReportInfo(BuildContext context) {
